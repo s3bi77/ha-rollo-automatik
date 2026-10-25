@@ -1,156 +1,59 @@
 # Rollo Automatik
 
-Home-Assistant-Integration für die automatische Rollladensteuerung pro Raum. Sie löst den Node-RED-Subflow „Rollo Automatik“ ab und übernimmt dessen Logik 1:1.
+Home-Assistant-Integration für die automatische Rollladensteuerung pro Raum.
 
-Jeder Raum ist ein eigener Eintrag mit einem Gerät „<Raum> Rollo“. Das Gerät bringt diese Entitäten mit (die IDs sind dieselben wie bisher aus Node-RED):
+## Einrichtung
+
+Einstellungen → Geräte & Dienste → Integration hinzufügen → „Rollo Automatik“. Pro Bereich ein Eintrag:
+
+1. **Bereich** wählen. Angeboten werden Bereiche mit Rollos.
+2. **Raum:** Rollos des Bereichs, Präsenzmelder, optional Schlafmodus-Schalter und Heizung/Klima. Vorgeschlagen werden Entitäten aus dem Bereich.
+3. **Je Rollo:** Fensterkontakt, Ausrichtung des Fensters (Himmelsrichtung oder Azimut in Grad), optional eine eigene Beschattungsposition und Bedingungen, wann beschattet werden darf. Die Bedingungen sind normale Home-Assistant-Bedingungen.
+4. **Außensensoren:** Außenhelligkeit, Außentemperatur, optional Dämmerung und das Label der Präsenzmelder im Haus. Beim nächsten Raum werden diese Werte vorgeschlagen.
+
+Alles lässt sich später über „Konfigurieren“ ändern.
+
+Jeder Raum bekommt ein Gerät „<Bereich> Rollos“ im Bereich:
 
 | Entität | Zweck |
 |---|---|
-| `switch.<präfix>_rollo_automatik_aktiv` | Automatik an/aus |
-| `switch.<präfix>_rollo_automatische_beschattung` | Beschattung bei direkter Sonne |
-| `number.<präfix>_rollo_zielposition_fenster_offen` | Mindestposition bei offenem Fenster |
-| `number.<präfix>_rollo_zielposition_beschattung` | Position beim Beschatten |
-| `number.<präfix>_rollo_zielposition_schlafmodus` | Position im Schlafmodus (nur mit Schlafmodus) |
-| `number.<präfix>_rollo_zielposition_schlafmodus_fenster_offen` | Schlafmodus + Fenster offen (nur mit Schlafmodus) |
-| `number.<präfix>_rollo_lux_threshold` / `_lux_hysteresis` | Ab wann es „hell“ ist |
-| `number.<präfix>_rollo_kalte_threshold` | Ab wann es „kalt“ ist (Hysterese +1 °C) |
-| `number.<präfix>_rollo_automatik_totzone` | Kleinere Abweichungen werden nicht gefahren |
-| `sensor.<präfix>_rollo_automatik_status` | Ziel und Grund pro Rollo, Details in den Attributen |
+| Automatik | Automatik an/aus |
+| Beschattung | Beschattung bei direkter Sonne an/aus |
+| Position bei offenem Fenster | Mindestposition, solange das Fenster offen ist |
+| Beschattungsposition | Position beim Beschatten |
+| Schlafposition | Position im Schlafmodus (nur mit Schlafmodus-Schalter) |
+| Schlafposition bei offenem Fenster | Schlafmodus und Fenster offen (nur mit Schlafmodus-Schalter) |
+| Helligkeitsschwelle / Helligkeit Hysterese | Ab wann es „hell“ ist |
+| Kälteschwelle | Ab wann es „kalt“ ist (aus erst bei Schwelle + 1 °C) |
+| Totzone | Kleinere Abweichungen werden nicht gefahren |
+| Status | Ziel und Grund pro Rollo, Details in den Attributen |
 
 ## Logik
 
-Für jedes Rollo werden die Regeln der Reihe nach angewendet. „Max“ begrenzt die Position nach oben, „Min“ nach unten:
+Für jedes Rollo werden die Regeln der Reihe nach angewendet. „Höchstens“ begrenzt die Position nach oben, „mindestens“ nach unten. Die letzte greifende Regel bestimmt das Ziel:
 
-1. **Dämmerung** → max 0 (zu).
-2. Sonst: **Präsenz im Raum** oder Rollo steht auf 100 → min 100 (offen).
-3. Sonst bei **Abwesenheit**: Heizen + hell + Sonne direkt → min 100. Kalt → max 0. Kühlen + hell → max 0.
-4. **Beschattung** (Schalter an, hell, Sonne direkt, Sonnenregel erfüllt) → max Beschattungsposition.
-5. **Fenster offen** → min Fensterposition.
-6. **Schlafmodus** → genau Schlafposition; mit offenem Fenster min „Schlafmodus Fenster offen“.
+1. **Dämmerung** → höchstens 0 (zu). Ohne Dämmerungssensor gilt der Sonnenuntergang.
+2. Sonst **Anwesenheit** im Raum oder Rollo ganz offen → mindestens 100.
+3. Sonst bei **Abwesenheit**:
+   - Heizen, hell und Sonne direkt → mindestens 100 (Sonnenwärme)
+   - kalt → höchstens 0
+   - Kühlen und hell → höchstens 0 (Hitzeschutz)
+4. **Beschattung** (Schalter an, hell, Sonne direkt, Bedingungen erfüllt) → höchstens Beschattungsposition.
+5. **Fenster offen** → mindestens Fensterposition.
+6. **Schlafmodus** → genau Schlafposition; bei offenem Fenster mindestens die Schlafposition bei offenem Fenster.
 
-Gefahren wird nur, wenn sich die greifenden Regeln seit der letzten Auswertung geändert haben und die Abweichung größer als die Totzone ist. Von Hand verstellte Rollos bleiben so in Ruhe.
+Die Sonne gilt als direkt, wenn ihr Azimut höchstens 65° von der Ausrichtung des Fensters abweicht und sie zwischen 10° und 80° hoch steht. Sonnenstand aus `sun.sun`.
 
-Präsenz bleibt nach einmaliger Erkennung gesetzt, bis kein Präsenzmelder im Haus (Label „Präsenz“) mehr an ist. Nach einer Fahrt bei Abwesenheit wird sie 4 Minuten ignoriert, damit das fahrende Rollo den Melder nicht auslöst.
+Gefahren wird nur, wenn sich die greifenden Regeln seit der letzten Auswertung geändert haben und die Abweichung größer als die Totzone ist. Von Hand verstellte Rollos bleiben so in Ruhe, bis sich die Lage ändert.
 
-### Namenskonvention
+Anwesenheit bleibt nach einmaliger Erkennung gesetzt, bis kein Präsenzmelder mit dem gewählten Label mehr an ist. Nach einer Fahrt bei Abwesenheit wird sie 4 Minuten ignoriert, damit das fahrende Rollo den Melder nicht auslöst.
 
-Ohne eigene Angaben nutzt ein Raum mit Präfix `kind_1` und Rollo-Suffix `fenster`:
-
-- Rollo: `cover.kind_1_rollo_fenster`
-- Fensterkontakt: `binary_sensor.kind_1_fenster_geoffnet`
-- Präsenz: `binary_sensor.kind_1_prasenz`
-- Schlafmodus: `switch.kind_1_schlafmodus`
-- Heizen/Kühlen: `climate.kind_1`
-
-### Rollo-Liste
-
-```yaml
-- suffix: fenster          # Pflicht
-  direction: 0             # 0 = Ost/Süd (Azimut 80–210°), 1 = Süd/West, 2 = West, 3 = Nord
-  overrideSunPos: 30       # optional: eigene Beschattungsposition
-  cover: cover.x           # optional: abweichendes Rollo
-  window: binary_sensor.y  # optional: abweichender Fensterkontakt
-  sunRule:                 # optional: wann beschattet werden darf (ohne Regel: immer)
-    allOf:
-      - entity: select.heizung_betriebsmodus
-        eq: Kühlen
-      - entity: cover.markise_controller_markise_1
-        ne: closed
-```
-
-Regeln: `{entity, eq}` oder `{entity, ne}`, kombinierbar mit `allOf` / `anyOf`.
+Die drei Schlaf- und Fensterpositionen halten sich gegenseitig in der Reihenfolge Schlafposition ≤ Schlafposition bei offenem Fenster ≤ Position bei offenem Fenster.
 
 ## Installation über HACS
 
 1. HACS → Benutzerdefinierte Repositories → `https://github.com/s3bi77/ha-rollo-automatik`, Typ „Integration“.
-2. „Rollo Automatik“ installieren, Home Assistant neu starten.
-3. Einstellungen → Geräte & Dienste → Integration hinzufügen → „Rollo Automatik“, einmal pro Raum.
-
-## Umstieg von Node-RED (pro Raum)
-
-1. Raum in HA anlegen, dabei **„Werte und Entity-IDs von Node-RED übernehmen“** anhaken. Die aktuellen Einstellungen werden gelesen, die Node-RED-Entitäten entfernt und ihre IDs übernommen. Dashboards und Automationen bleiben gültig.
-2. **Direkt danach** in Node-RED die Subflow-Instanz des Raums löschen und deployen. Sonst legt Node-RED die Entitäten beim nächsten Start mit `_2` neu an, und beide Systeme fahren das Rollo.
-
-Die Rollo-Listen der bisherigen Räume:
-
-<details>
-<summary>Kind 1 / Kind 2 (Präfix <code>kind_1</code> / <code>kind_2</code>, Schlafmodus an)</summary>
-
-```yaml
-- suffix: fenster
-  direction: 0
-  sunRule:
-    entity: select.heizung_betriebsmodus
-    eq: Kühlen
-```
-</details>
-
-<details>
-<summary>Bad OG, Büro EG, Schlafzimmer (Präfix <code>bad_og</code>, <code>buro_eg</code>, <code>schlafzimmer</code>, Schlafmodus an)</summary>
-
-```yaml
-- suffix: fenster
-  direction: 2
-  sunRule:
-    entity: select.heizung_betriebsmodus
-    eq: Kühlen
-```
-</details>
-
-<details>
-<summary>Büro OG (Präfix <code>buro_og</code>, Schlafmodus aus)</summary>
-
-```yaml
-- suffix: fenster
-  direction: 0
-  sunRule:
-    anyOf:
-      - entity: binary_sensor.buro_og_prasenz
-        eq: "on"
-      - entity: select.heizung_betriebsmodus
-        eq: Kühlen
-```
-</details>
-
-<details>
-<summary>Wohnzimmer (Präfix <code>wohnzimmer</code>, Schlafmodus aus)</summary>
-
-```yaml
-- suffix: tur_links
-  direction: 0
-  sunRule:
-    allOf:
-      - anyOf:
-          - entity: select.heizung_betriebsmodus
-            eq: Kühlen
-          - entity: binary_sensor.wohnzimmer_tv_status
-            eq: "on"
-      - entity: cover.markise_controller_markise_1
-        ne: closed
-- suffix: tur_rechts
-  direction: 0
-  sunRule:
-    allOf:
-      - entity: select.heizung_betriebsmodus
-        eq: Kühlen
-      - entity: cover.markise_controller_markise_1
-        ne: closed
-- suffix: kuchenfenster
-  direction: 1
-  overrideSunPos: 30
-  sunRule:
-    entity: select.heizung_betriebsmodus
-    eq: Kühlen
-```
-</details>
-
-## Unterschiede zu Node-RED
-
-- Ein Einstellwert von 0 wird jetzt als 0 genommen. Node-RED hat 0 bei Fenster-/Beschattungsposition stillschweigend durch den Standardwert ersetzt.
-- Eine Außentemperatur von genau 0 °C zählt jetzt als Messwert. Ohne Messwert bleibt der letzte Kälte-Zustand erhalten.
-- Ein Rollo ohne `sunRule` darf beschatten. In Node-RED hat ein fehlendes `sunRule` die Beschattung blockiert. Alle bisherigen Räume haben eine Regel, betroffen ist also keiner.
-- Die Hauspräsenz wird direkt aus den Meldern mit Label „Präsenz“ gelesen. In Node-RED galt sie bis zur ersten Änderung nach einem Neustart als „niemand da“.
-- Der Status-Sensor zeigt eine Kurzfassung. Die vollständige Begründung steht in den Attributen.
+2. „Rollo Automatik“ installieren und Home Assistant neu starten.
 
 ## Entwicklung
 

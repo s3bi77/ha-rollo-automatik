@@ -31,7 +31,7 @@ class RolloNumber(RolloEntity, RestoreNumber):
     _attr_mode = NumberMode.BOX
 
     def __init__(self, controller: RoomController, spec: NumberSpec) -> None:
-        super().__init__(controller, "number", spec.key)
+        super().__init__(controller, spec.key)
         self._attr_native_min_value = spec.min_value
         self._attr_native_max_value = spec.max_value
         self._attr_native_step = spec.step
@@ -48,11 +48,6 @@ class RolloNumber(RolloEntity, RestoreNumber):
         value: float | None = None
         if (last := await self.async_get_last_number_data()) is not None:
             value = last.native_value
-        if value is None and (initial := self.initial_value()) is not None:
-            try:
-                value = float(initial)
-            except ValueError:
-                value = None
         if value is not None:
             self.controller.set_number(self.key, value, evaluate_after=False)
 

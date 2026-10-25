@@ -27,7 +27,7 @@ async def async_setup_entry(
 
 class RolloSwitch(RolloEntity, SwitchEntity, RestoreEntity):
     def __init__(self, controller: RoomController, key: str) -> None:
-        super().__init__(controller, "switch", key)
+        super().__init__(controller, key)
 
     @property
     def is_on(self) -> bool:
@@ -36,9 +36,8 @@ class RolloSwitch(RolloEntity, SwitchEntity, RestoreEntity):
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         last = await self.async_get_last_state()
-        value = last.state if last is not None else self.initial_value()
-        if value in ("on", "off"):
-            self.controller.set_switch(self.key, value == STATE_ON, evaluate_after=False)
+        if last is not None and last.state in ("on", "off"):
+            self.controller.set_switch(self.key, last.state == STATE_ON, evaluate_after=False)
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         self.controller.set_switch(self.key, True)

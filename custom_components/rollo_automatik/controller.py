@@ -10,59 +10,48 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
-from homeassistant.helpers import entity_registry as er, label_registry as lr
+from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import area_registry as ar, condition, entity_registry as er
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.event import async_track_state_change_event
 
 from .const import (
-    CONF_AZIMUTH_ENTITY,
+    CONF_AREA,
+    CONF_CLIMATE_ENTITY,
+    CONF_COVER_ENTITY,
+    CONF_COVERS,
     CONF_DUSK_ENTITY,
-    CONF_ELEVATION_ENTITY,
-    CONF_LUX_ENTITY,
-    CONF_PREFIX,
+    CONF_ILLUMINANCE_ENTITY,
+    CONF_ORIENTATION,
+    CONF_PRESENCE_ENTITY,
     CONF_PRESENCE_LABEL,
-    CONF_ROLLOS,
-    CONF_ROOM_NAME,
-    CONF_SLEEP_MODE,
-    CONF_TEMP_ENTITY,
-    DEFAULT_AZIMUTH_ENTITY,
-    DEFAULT_DUSK_ENTITY,
-    DEFAULT_ELEVATION_ENTITY,
-    DEFAULT_LUX_ENTITY,
-    DEFAULT_PRESENCE_LABEL,
-    DEFAULT_TEMP_ENTITY,
+    CONF_SHADING_CONDITIONS,
+    CONF_SHADING_POSITION,
+    CONF_SLEEP_ENTITY,
+    CONF_TEMPERATURE_ENTITY,
+    CONF_WINDOW_ENTITY,
+    DEFAULT_ORIENTATION,
     DOMAIN,
-    NUMBER_TO_SETTING,
     NUMBERS,
-    ROLLO_COVER,
-    ROLLO_DIRECTION,
-    ROLLO_OVERRIDE_SUN_POS,
-    ROLLO_SUFFIX,
-    ROLLO_SUN_RULE,
-    ROLLO_WINDOW,
-    SWITCH_AUTOMATIK_AKTIV,
-    SWITCH_BESCHATTUNG,
+    ORIENTATIONS,
+    SUN_ENTITY,
+    SWITCH_AUTOMATION,
+    SWITCH_SHADING,
     SWITCHES,
 )
-from .logic import (
-    Inputs,
-    Result,
-    RolloConfig,
-    RoomState,
-    Settings,
-    cascade_positions,
-    evaluate,
-)
+from .logic import CoverConfig, Inputs, Result, RoomState, Settings, cascade_positions, evaluate
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def _rule_entities(rule: Any) -> list[str]:
-    if not isinstance(rule, dict):
-        return []
-    if "entity" in rule:
-        return [rule["entity"]]
-    return [e for sub in rule.get("allOf", []) + rule.get("anyOf", []) for e in _rule_entities(sub)]
+def orientation_degrees(value: Any) -> float:
+    """Wandelt eine Himmelsrichtung oder Gradzahl in Grad um."""
+    if value in ORIENTATIONS:
+        return ORIENTATIONS[value]
+    try:
+        return float(value) % 360
+    except (TypeError, ValueError):
+        return ORIENTATIONS[DEFAULT_ORIENTATION]
 
 
 class RoomController:
@@ -72,37 +61,34 @@ class RoomController:
         self.hass = hass
         self.entry = entry
         conf = {**entry.data, **entry.options}
-        self.room_name: str = conf[CONF_ROOM_NAME]
-        self.prefix: str = conf[CONF_PREFIX]
-        self.sleep_mode: bool = conf.get(CONF_SLEEP_MODE, True)
-        self.lux_entity: str = conf.get(CONF_LUX_ENTITY, DEFAULT_LUX_ENTITY)
-        self.temp_entity: str = conf.get(CONF_TEMP_ENTITY, DEFAULT_TEMP_ENTITY)
-        self.dusk_entity: str = conf.get(CONF_DUSK_ENTITY, DEFAULT_DUSK_ENTITY)
-        self.azimuth_entity: str = conf.get(CONF_AZIMUTH_ENTITY, DEFAULT_AZIMUTH_ENTITY)
-        self.elevation_entity: str = conf.get(CONF_ELEVATION_ENTITY, DEFAULT_ELEVATION_ENTITY)
-        self.presence_label: str = conf.get(CONF_PRESENCE_LABEL, DEFAULT_PRESENCE_LABEL)
+        self.area_id: str = conf[CONF_AREA]
+        area = ar.async_get(hass).async_get_area(self.area_id)
+        self.area_name = area.name if area else entry.title
 
-        self.rollos: list[RolloConfig] = [
-            RolloConfig(
-                suffix=r[ROLLO_SUFFIX],
-                cover_entity=r.get(ROLLO_COVER) or f"cover.{self.prefix}_rollo_{r[ROLLO_SUFFIX]}",
-                window_entity=r.get(ROLLO_WINDOW)
-                or f"binary_sensor.{self.prefix}_{r[ROLLO_SUFFIX]}_geoffnet",
-                direction=int(r.get(ROLLO_DIRECTION, 0)),
-                sun_rule=r.get(ROLLO_SUN_RULE),
-                override_sun_pos=r.get(ROLLO_OVERRIDE_SUN_POS),
+        self.presence_entity: str | None = conf.get(CONF_PRESENCE_ENTITY)
+        self.sleep_entity: str | None = conf.get(CONF_SLEEP_ENTITY)
+        self.climate_entity: str | None = conf.get(CONF_CLIMATE_ENTITY)
+        self.illuminance_entity: str | None = conf.get(CONF_ILLUMINANCE_ENTITY)
+        self.temperature_entity: str | None = conf.get(CONF_TEMPERATURE_ENTITY)
+        self.dusk_entity: str | None = conf.get(CONF_DUSK_ENTITY)
+        self.presence_label: str | None = conf.get(CONF_PRESENCE_LABEL)
+
+        self.cover_conf: list[dict[str, Any]] = conf.get(CONF_COVERS, [])
+        self.covers = [
+            CoverConfig(
+                cover_entity=c[CONF_COVER_ENTITY],
+                window_entity=c.get(CONF_WINDOW_ENTITY),
+                orientation=orientation_degrees(c.get(CONF_ORIENTATION, DEFAULT_ORIENTATION)),
+                shading_position=c.get(CONF_SHADING_POSITION),
             )
-            for r in conf.get(CONF_ROLLOS, [])
+            for c in self.cover_conf
         ]
+        self._shading_checks: dict[str, Callable[..., bool]] = {}
+        self._condition_entities: set[str] = set()
 
-        self.presence_entity = f"binary_sensor.{self.prefix}_prasenz"
-        self.sleep_entity = f"switch.{self.prefix}_schlafmodus"
-        self.climate_entity = f"climate.{self.prefix}"
-
+        self.has_sleep = self.sleep_entity is not None
         self.numbers: dict[str, float] = {
-            spec.key: spec.default
-            for spec in NUMBERS
-            if self.sleep_mode or not spec.sleep_only
+            spec.key: spec.default for spec in NUMBERS if self.has_sleep or not spec.sleep_only
         }
         self.switches: dict[str, bool] = dict(SWITCHES)
         self.state = RoomState()
@@ -111,34 +97,44 @@ class RoomController:
         self._unsub: list[Callable[[], None]] = []
         self._ready = False
 
-    # --- Gerät und IDs -------------------------------------------------
-
     @property
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={(DOMAIN, self.entry.entry_id)},
-            name=f"{self.room_name} Rollo",
+            name=f"{self.area_name} Rollos",
             manufacturer="Rollo Automatik",
-            model="Raum",
+            model="Raumsteuerung",
+            suggested_area=self.area_name,
         )
-
-    def object_id(self, key: str) -> str:
-        return f"{self.prefix}_rollo_{key}"
 
     # --- Lebenszyklus ----------------------------------------------------
 
+    async def async_load_conditions(self) -> None:
+        """Bereitet die Beschattungsbedingungen der Rollos vor."""
+        for cover in self.cover_conf:
+            configs = cover.get(CONF_SHADING_CONDITIONS) or []
+            if not configs:
+                continue
+            try:
+                validated = await condition.async_validate_conditions_config(self.hass, configs)
+                self._shading_checks[cover[CONF_COVER_ENTITY]] = await condition.async_conditions_from_config(
+                    self.hass, validated, _LOGGER, f"Beschattung {cover[CONF_COVER_ENTITY]}"
+                )
+            except (HomeAssistantError, ValueError) as err:
+                _LOGGER.error("Ungültige Beschattungsbedingung für %s: %s", cover[CONF_COVER_ENTITY], err)
+                self._shading_checks[cover[CONF_COVER_ENTITY]] = lambda *_: False
+                continue
+            for conf in validated:
+                self._condition_entities |= condition.async_extract_entities(conf)
+
     @callback
     def async_start(self) -> None:
-        """Beginnt, auf Zustandsänderungen zu hören."""
         self._ready = True
         self._unsub.append(
             async_track_state_change_event(self.hass, self._watched_entities(), self._on_state_change)
         )
-        # Präsenz-Label: die Liste der Entitäten kann sich ändern
         self._unsub.append(
-            self.hass.bus.async_listen(
-                er.EVENT_ENTITY_REGISTRY_UPDATED, self._on_registry_updated
-            )
+            self.hass.bus.async_listen(er.EVENT_ENTITY_REGISTRY_UPDATED, self._on_registry_updated)
         )
 
     @callback
@@ -150,42 +146,49 @@ class RoomController:
 
     @callback
     def _on_registry_updated(self, event: Event) -> None:
+        # Ein Label kann neu vergeben worden sein: Präsenzmelder neu abonnieren
         if event.data.get("action") != "update" or "labels" not in event.data.get("changes", {}):
             return
-        # Neu abonnieren, damit neue Präsenz-Entitäten mitzählen
         self.async_stop()
         self.async_start()
 
     def _house_presence_entities(self) -> list[str]:
-        label = lr.async_get(self.hass).async_get_label_by_name(self.presence_label)
-        if label is None:
+        if not self.presence_label:
             return []
         registry = er.async_get(self.hass)
-        return [e.entity_id for e in er.async_entries_for_label(registry, label.label_id)]
+        return [e.entity_id for e in er.async_entries_for_label(registry, self.presence_label)]
 
     def _watched_entities(self) -> list[str]:
         entities = {
-            self.lux_entity,
-            self.temp_entity,
+            SUN_ENTITY,
+            *self._house_presence_entities(),
+            *self._condition_entities,
+        }
+        for entity_id in (
+            self.illuminance_entity,
+            self.temperature_entity,
             self.dusk_entity,
-            self.azimuth_entity,
-            self.elevation_entity,
             self.presence_entity,
             self.sleep_entity,
             self.climate_entity,
-            *self._house_presence_entities(),
-        }
-        for rollo in self.rollos:
-            entities.update((rollo.cover_entity, rollo.window_entity))
-            entities.update(_rule_entities(rollo.sun_rule))
+        ):
+            if entity_id:
+                entities.add(entity_id)
+        for cover in self.covers:
+            entities.add(cover.cover_entity)
+            if cover.window_entity:
+                entities.add(cover.window_entity)
         return sorted(entities)
 
     @callback
     def _on_state_change(self, event: Event[EventStateChangedData]) -> None:
         old = event.data["old_state"]
         new = event.data["new_state"]
-        # Wie in Node-RED: nur echte Zustandswechsel, keine reinen Attribut-Updates
-        if old is not None and new is not None and old.state == new.state:
+        if event.data["entity_id"] == SUN_ENTITY:
+            # Sonnenstand steckt in Attributen; nur auf ganze Grad reagieren
+            if old and new and _sun_tuple(old.attributes) == _sun_tuple(new.attributes):
+                return
+        elif old is not None and new is not None and old.state == new.state:
             return
         self.async_evaluate()
 
@@ -203,30 +206,18 @@ class RoomController:
     @callback
     def set_number(self, key: str, value: float, *, evaluate_after: bool = True) -> None:
         self.numbers[key] = value
-        if self.sleep_mode and evaluate_after:
-            self._cascade(key)
+        if self.has_sleep and evaluate_after:
+            self.numbers.update(
+                cascade_positions(
+                    key,
+                    sleep_position=self.numbers["sleep_position"],
+                    sleep_window_position=self.numbers["sleep_window_position"],
+                    window_position=self.numbers["window_position"],
+                )
+            )
         self._notify()
         if evaluate_after:
             self.async_evaluate()
-
-    @callback
-    def _cascade(self, changed_key: str) -> None:
-        names = {
-            "zielposition_schlafmodus": "sleep_pos",
-            "zielposition_schlafmodus_fenster_offen": "sleep_window_pos",
-            "zielposition_fenster_offen": "window_pos",
-        }
-        if changed_key not in names:
-            return
-        updates = cascade_positions(
-            names[changed_key],
-            sleep_pos=self.numbers["zielposition_schlafmodus"],
-            sleep_window_pos=self.numbers["zielposition_schlafmodus_fenster_offen"],
-            window_pos=self.numbers["zielposition_fenster_offen"],
-        )
-        reverse = {v: k for k, v in names.items()}
-        for name, value in updates.items():
-            self.numbers[reverse[name]] = value
 
     @callback
     def set_switch(self, key: str, value: bool, *, evaluate_after: bool = True) -> None:
@@ -237,68 +228,88 @@ class RoomController:
 
     # --- Auswertung -------------------------------------------------------
 
-    def _state(self, entity_id: str) -> str | None:
+    def _state(self, entity_id: str | None) -> str | None:
+        if not entity_id:
+            return None
         state = self.hass.states.get(entity_id)
         if state is None or state.state in (STATE_UNAVAILABLE, STATE_UNKNOWN):
             return None
         return state.state
 
-    def _float(self, entity_id: str) -> float | None:
+    def _float(self, entity_id: str | None) -> float | None:
         value = self._state(entity_id)
         try:
             return float(value) if value is not None else None
         except ValueError:
             return None
 
-    def _cover_position(self, entity_id: str) -> float | None:
+    def _attr(self, entity_id: str, attribute: str) -> float | None:
         state = self.hass.states.get(entity_id)
-        if state is None:
+        value = state.attributes.get(attribute) if state else None
+        try:
+            return float(value) if value is not None else None
+        except (TypeError, ValueError):
             return None
-        pos = state.attributes.get("current_position")
-        return float(pos) if pos is not None else None
 
-    def _settings(self) -> Settings:
-        values = {NUMBER_TO_SETTING[k]: v for k, v in self.numbers.items()}
-        return Settings(sun_active=self.switches[SWITCH_BESCHATTUNG], **values)
+    def _dusk(self) -> bool:
+        if self.dusk_entity:
+            return self._state(self.dusk_entity) == STATE_ON
+        return self._state(SUN_ENTITY) == "below_horizon"
 
     def _inputs(self) -> Inputs:
-        house = any(self._state(e) == STATE_ON for e in self._house_presence_entities())
+        if self.presence_label:
+            house = any(self._state(e) == STATE_ON for e in self._house_presence_entities())
+        else:
+            house = True
         return Inputs(
-            lux=self._float(self.lux_entity),
-            temp=self._float(self.temp_entity),
+            illuminance=self._float(self.illuminance_entity),
+            temperature=self._float(self.temperature_entity),
             hvac=self._state(self.climate_entity) or "",
-            dusk=self._state(self.dusk_entity) == STATE_ON,
-            raw_presence=self._state(self.presence_entity) == STATE_ON,
+            dusk=self._dusk(),
+            room_presence=self._state(self.presence_entity) == STATE_ON,
             house_presence=house,
-            sleep=self.sleep_mode and self._state(self.sleep_entity) == STATE_ON,
-            azimuth=self._float(self.azimuth_entity),
-            elevation=self._float(self.elevation_entity),
-            window_open={r.suffix: self._state(r.window_entity) == STATE_ON for r in self.rollos},
-            cover_pos={r.suffix: self._cover_position(r.cover_entity) for r in self.rollos},
-            get_state=lambda entity_id: (s.state if (s := self.hass.states.get(entity_id)) else None),
+            sleep=self.has_sleep and self._state(self.sleep_entity) == STATE_ON,
+            sun_azimuth=self._attr(SUN_ENTITY, "azimuth"),
+            sun_elevation=self._attr(SUN_ENTITY, "elevation"),
+            window_open={
+                c.cover_entity: self._state(c.window_entity) == STATE_ON for c in self.covers
+            },
+            cover_position={
+                c.cover_entity: self._attr(c.cover_entity, "current_position") for c in self.covers
+            },
+            shading_allowed={
+                entity_id: bool(check()) for entity_id, check in self._shading_checks.items()
+            },
         )
+
+    def _settings(self) -> Settings:
+        return Settings(shading=self.switches[SWITCH_SHADING], **self.numbers)
 
     @callback
     def async_evaluate(self) -> None:
-        """Wertet aus und fährt Rollos, deren Bedingungen sich geändert haben."""
-        if not self._ready or not self.switches[SWITCH_AUTOMATIK_AKTIV]:
+        """Wertet aus und fährt Rollos, deren Regeln sich geändert haben."""
+        if not self._ready or not self.switches[SWITCH_AUTOMATION]:
             return
-        result = evaluate(self.rollos, self._settings(), self._inputs(), self.state, time.time())
+        result = evaluate(self.covers, self._settings(), self._inputs(), self.state, time.time())
         self.last_result = result
-        for rollo in result.moves:
-            _LOGGER.debug(
-                "%s: %s auf %s (%s)",
-                self.room_name,
-                rollo.cover_entity,
-                rollo.target,
-                "; ".join(rollo.reason),
-            )
+        for cover in result.moves:
+            _LOGGER.debug("%s: %s auf %s (%s)", self.area_name, cover.cover_entity, cover.target, cover.reason)
             self.hass.async_create_task(
                 self.hass.services.async_call(
                     "cover",
                     "set_cover_position",
-                    {"entity_id": rollo.cover_entity, "position": int(rollo.target)},
+                    {"entity_id": cover.cover_entity, "position": int(cover.target)},
                     blocking=False,
                 )
             )
         self._notify()
+
+
+def _sun_tuple(attributes: Any) -> tuple[int | None, int | None]:
+    def rounded(value: Any) -> int | None:
+        try:
+            return round(float(value))
+        except (TypeError, ValueError):
+            return None
+
+    return rounded(attributes.get("azimuth")), rounded(attributes.get("elevation"))

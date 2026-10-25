@@ -1,4 +1,4 @@
-"""Status-Sensor: Zielposition und Begründung pro Rollo."""
+"""Status-Sensor: Zielposition und Grund pro Rollo."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import RolloConfigEntry
-from .const import SENSOR_STATUS
+from .const import SENSOR_STATUS, SWITCH_AUTOMATION
 from .controller import RoomController
 from .entity import RolloEntity
 
@@ -27,16 +27,25 @@ class RolloStatusSensor(RolloEntity, SensorEntity):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, controller: RoomController) -> None:
-        super().__init__(controller, "sensor", SENSOR_STATUS)
+        super().__init__(controller, SENSOR_STATUS)
+
+    def _name(self, entity_id: str) -> str:
+        state = self.hass.states.get(entity_id)
+        return state.name if state else entity_id
 
     @property
     def native_value(self) -> str | None:
-        if not self.controller.switches["automatik_aktiv"]:
+        if not self.controller.switches[SWITCH_AUTOMATION]:
             return "Automatik aus"
         result = self.controller.last_result
         if result is None:
             return None
-        return result.summary[:255]
+        parts = []
+        for cover in result.covers:
+            target = "–" if cover.target is None else f"{cover.target:g} %"
+            reason = f" ({cover.reason})" if cover.reason else ""
+            parts.append(f"{self._name(cover.cover_entity)}: {target}{reason}")
+        return "; ".join(parts)[:255]
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
@@ -44,18 +53,18 @@ class RolloStatusSensor(RolloEntity, SensorEntity):
         if result is None:
             return None
         return {
-            "praesenz": result.presence,
-            "hell": result.lux_above,
-            "kalt": result.temp_below,
+            "anwesenheit": result.presence,
+            "hell": result.bright,
+            "kalt": result.cold,
             "rollos": {
-                r.suffix: {
-                    "rollo": r.cover_entity,
-                    "ziel": r.target,
-                    "sonne_direkt": result.sun_direct.get(r.suffix),
-                    "gefahren": r.move,
-                    "nicht_gefahren_weil": r.skip_reason,
-                    "begruendung": r.reason,
+                cover.cover_entity: {
+                    "ziel": cover.target,
+                    "grund": cover.reason,
+                    "regeln": [f"{reason}: {value:g}" for reason, value in cover.constraints],
+                    "sonne_direkt": cover.sun_direct,
+                    "gefahren": cover.move,
+                    "nicht_gefahren_weil": cover.skip_reason,
                 }
-                for r in result.rollos
+                for cover in result.covers
             },
         }

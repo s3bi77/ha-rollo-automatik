@@ -6,36 +6,47 @@ from dataclasses import dataclass
 
 DOMAIN = "rollo_automatik"
 
-CONF_ROOM_NAME = "room_name"
-CONF_PREFIX = "prefix"
-CONF_SLEEP_MODE = "sleep_mode"
-CONF_ROLLOS = "rollos"
-CONF_IMPORT_NODERED = "import_nodered"
-CONF_INITIAL_VALUES = "initial_values"
+# Raum
+CONF_AREA = "area"
+CONF_COVERS = "covers"
+CONF_PRESENCE_ENTITY = "presence_entity"
+CONF_SLEEP_ENTITY = "sleep_entity"
+CONF_CLIMATE_ENTITY = "climate_entity"
 
-CONF_LUX_ENTITY = "lux_entity"
-CONF_TEMP_ENTITY = "temp_entity"
+# Pro Rollo
+CONF_COVER_ENTITY = "entity_id"
+CONF_WINDOW_ENTITY = "window_entity"
+CONF_ORIENTATION = "orientation"
+CONF_SHADING_POSITION = "shading_position"
+CONF_SHADING_CONDITIONS = "shading_conditions"
+
+# Außen
+CONF_ILLUMINANCE_ENTITY = "illuminance_entity"
+CONF_TEMPERATURE_ENTITY = "temperature_entity"
 CONF_DUSK_ENTITY = "dusk_entity"
-CONF_AZIMUTH_ENTITY = "azimuth_entity"
-CONF_ELEVATION_ENTITY = "elevation_entity"
 CONF_PRESENCE_LABEL = "presence_label"
 
-DEFAULT_LUX_ENTITY = "sensor.aussen_helligkeit"
-DEFAULT_TEMP_ENTITY = "sensor.aussentemperatur"
-DEFAULT_DUSK_ENTITY = "binary_sensor.dammerung"
-DEFAULT_AZIMUTH_ENTITY = "sensor.sun_solar_azimuth"
-DEFAULT_ELEVATION_ENTITY = "sensor.sun_solar_elevation"
-DEFAULT_PRESENCE_LABEL = "Präsenz"
+OUTDOOR_KEYS = (
+    CONF_ILLUMINANCE_ENTITY,
+    CONF_TEMPERATURE_ENTITY,
+    CONF_DUSK_ENTITY,
+    CONF_PRESENCE_LABEL,
+)
 
-# Schlüssel in der Rollo-Liste (gleiche Namen wie im Node-RED-Subflow)
-ROLLO_SUFFIX = "suffix"
-ROLLO_DIRECTION = "direction"
-ROLLO_SUN_RULE = "sunRule"
-ROLLO_OVERRIDE_SUN_POS = "overrideSunPos"
-ROLLO_COVER = "cover"
-ROLLO_WINDOW = "window"
+SUN_ENTITY = "sun.sun"
 
-DEFAULT_ROLLOS = [{ROLLO_SUFFIX: "fenster", ROLLO_DIRECTION: 0}]
+# Himmelsrichtung der Fensterfläche (Azimut in Grad)
+ORIENTATIONS = {
+    "n": 0,
+    "ne": 45,
+    "e": 90,
+    "se": 135,
+    "s": 180,
+    "sw": 225,
+    "w": 270,
+    "nw": 315,
+}
+DEFAULT_ORIENTATION = "s"
 
 
 @dataclass(frozen=True)
@@ -51,35 +62,22 @@ class NumberSpec:
     sleep_only: bool = False
 
 
-# Die Schlüssel ergeben die Entity-IDs: number.<praefix>_rollo_<key>
 NUMBERS: tuple[NumberSpec, ...] = (
-    NumberSpec("zielposition_schlafmodus", 0, 100, 1, 0, "%", sleep_only=True),
-    NumberSpec("zielposition_schlafmodus_fenster_offen", 0, 100, 1, 20, "%", sleep_only=True),
-    NumberSpec("zielposition_fenster_offen", 0, 100, 1, 100, "%"),
-    NumberSpec("zielposition_beschattung", 0, 100, 1, 100, "%"),
-    NumberSpec("lux_threshold", 0, 10000, 50, 1500, "lx"),
-    NumberSpec("lux_hysteresis", 0, 1000, 10, 100, "lx"),
-    NumberSpec("kalte_threshold", -20, 30, 0.5, 5, "°C"),
-    NumberSpec("automatik_totzone", 0, 20, 1, 5, "%"),
+    NumberSpec("sleep_position", 0, 100, 1, 0, "%", sleep_only=True),
+    NumberSpec("sleep_window_position", 0, 100, 1, 20, "%", sleep_only=True),
+    NumberSpec("window_position", 0, 100, 1, 100, "%"),
+    NumberSpec("shading_position", 0, 100, 1, 50, "%"),
+    NumberSpec("illuminance_threshold", 0, 100000, 50, 1500, "lx"),
+    NumberSpec("illuminance_hysteresis", 0, 10000, 10, 100, "lx"),
+    NumberSpec("cold_threshold", -20, 30, 0.5, 5, "°C"),
+    NumberSpec("deadband", 0, 20, 1, 5, "%"),
 )
 
-SWITCH_AUTOMATIK_AKTIV = "automatik_aktiv"
-SWITCH_BESCHATTUNG = "automatische_beschattung"
+SWITCH_AUTOMATION = "automation"
+SWITCH_SHADING = "shading"
 SWITCHES: dict[str, bool] = {
-    SWITCH_AUTOMATIK_AKTIV: True,
-    SWITCH_BESCHATTUNG: False,
+    SWITCH_AUTOMATION: True,
+    SWITCH_SHADING: False,
 }
 
-SENSOR_STATUS = "automatik_status"
-
-# Verknüpfung Zahl -> Feld in logic.Settings bzw. cascade_positions
-NUMBER_TO_SETTING = {
-    "zielposition_schlafmodus": "sleep_pos",
-    "zielposition_schlafmodus_fenster_offen": "sleep_window_pos",
-    "zielposition_fenster_offen": "window_pos",
-    "zielposition_beschattung": "sun_pos",
-    "lux_threshold": "lux_threshold",
-    "lux_hysteresis": "lux_hyst",
-    "kalte_threshold": "cold_threshold",
-    "automatik_totzone": "deadband",
-}
+SENSOR_STATUS = "status"
