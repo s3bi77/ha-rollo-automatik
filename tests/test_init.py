@@ -176,21 +176,32 @@ async def test_config_flow(hass: HomeAssistant, area: str) -> None:
     assert result["step_id"] == "room"
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        {"covers": [COVER], "presence_entity": "binary_sensor.kind_1_anwesenheit"},
+        {
+            "covers_section": {"covers": [COVER]},
+            "sensors_section": {"presence_entity": "binary_sensor.kind_1_anwesenheit"},
+        },
     )
     assert result["step_id"] == "cover"
+    assert result["description_placeholders"]["index"] == "1"
+    assert result["description_placeholders"]["total"] == "1"
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
-            "window_entity": "binary_sensor.kind_1_fenster_offen",
-            "orientation": "sw",
-            "shading_conditions": [{"condition": "state", "entity_id": "input_boolean.x", "state": "on"}],
+            "window_section": {"window_entity": "binary_sensor.kind_1_fenster_offen"},
+            "sun_section": {
+                "orientation": "sw",
+                "shading_conditions": [{"condition": "state", "entity_id": "input_boolean.x", "state": "on"}],
+            },
         },
     )
     assert result["step_id"] == "outdoor"
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"outdoor_section": {"dusk_entity": "binary_sensor.dammerung"}, "house_section": {}},
+    )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Kind 1"
+    assert result["data"]["dusk_entity"] == "binary_sensor.dammerung"
     assert result["data"]["covers"][0]["orientation"] == "sw"
     assert result["data"]["sleep_entity"] is None
 
@@ -198,12 +209,18 @@ async def test_config_flow(hass: HomeAssistant, area: str) -> None:
 async def test_config_flow_rejects_bad_conditions(hass: HomeAssistant, area: str) -> None:
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {"area": area})
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"covers": [COVER]})
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {"orientation": "s", "shading_conditions": [{"condition": "quatsch"}]}
+        result["flow_id"], {"covers_section": {"covers": [COVER]}, "sensors_section": {}}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {
+            "window_section": {},
+            "sun_section": {"orientation": "s", "shading_conditions": [{"condition": "quatsch"}]},
+        },
     )
     assert result["step_id"] == "cover"
-    assert result["errors"] == {"shading_conditions": "invalid_conditions"}
+    assert result["errors"] == {"base": "invalid_conditions"}
 
 
 async def test_options_flow_keeps_cover_settings(hass: HomeAssistant, area: str) -> None:
@@ -211,13 +228,25 @@ async def test_options_flow_keeps_cover_settings(hass: HomeAssistant, area: str)
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["step_id"] == "room"
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"covers": [COVER], "sleep_entity": "switch.kind_1_schlafen"}
+        result["flow_id"],
+        {
+            "covers_section": {"covers": [COVER]},
+            "sensors_section": {"sleep_entity": "switch.kind_1_schlafen"},
+        },
     )
     assert result["step_id"] == "cover"
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"orientation": "w", "window_entity": "binary_sensor.kind_1_fenster_offen"}
+        result["flow_id"],
+        {
+            "window_section": {"window_entity": "binary_sensor.kind_1_fenster_offen"},
+            "sun_section": {"orientation": "w"},
+        },
     )
-    result = await hass.config_entries.options.async_configure(result["flow_id"], {})
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        {"outdoor_section": {"dusk_entity": "binary_sensor.dammerung"}, "house_section": {}},
+    )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
     assert entry.options["covers"][0]["orientation"] == "w"
+    assert entry.options["dusk_entity"] == "binary_sensor.dammerung"

@@ -2,62 +2,107 @@
   "config": {
     "step": {
       "user": {
-        "title": "Choose area",
-        "description": "Which area should have automatic covers?",
+        "title": "Set up cover automation",
+        "description": "Step 1 of 4: Which area should have automatic covers? Areas with covers are offered.",
         "data": {
           "area": "Area"
         },
-        "data_description": {}
+        "data_description": {
+          "area": "Each area is set up once and gets its own device."
+        }
       },
       "room": {
-        "title": "Covers in {area}",
-        "description": "Choose the covers and sensors of the room. Entities from the area are suggested.",
-        "data": {
-          "covers": "Covers",
-          "presence_entity": "Presence sensor",
-          "sleep_entity": "Sleep mode",
-          "climate_entity": "Heating/climate"
-        },
-        "data_description": {
-          "presence_entity": "When someone is present, covers open during the day.",
-          "sleep_entity": "Switch that indicates sleep mode. Without it there are no sleep settings.",
-          "climate_entity": "Heating or cooling decides whether sun is let in or blocked while nobody is home."
+        "title": "{area}: covers and sensors",
+        "description": "Step 2 of 4: Entities from the area {area} are suggested.",
+        "sections": {
+          "covers_section": {
+            "name": "Covers",
+            "description": "The automation controls these covers. You set up each one next.",
+            "data": {
+              "covers": "Covers"
+            },
+            "data_description": {
+              "covers": "At least one cover."
+            }
+          },
+          "sensors_section": {
+            "name": "Room sensors",
+            "description": "All optional.",
+            "data": {
+              "presence_entity": "Presence sensor",
+              "sleep_entity": "Sleep mode",
+              "climate_entity": "Heating/climate"
+            },
+            "data_description": {
+              "presence_entity": "When someone is present, covers open during the day.",
+              "sleep_entity": "Switch that indicates sleep mode. Without it there are no sleep positions.",
+              "climate_entity": "Heating or cooling decides whether sun is let in or blocked while nobody is home."
+            }
+          }
         }
       },
       "cover": {
-        "title": "{cover}",
-        "description": "Settings for this cover.",
-        "data": {
-          "window_entity": "Window sensor",
-          "orientation": "Window orientation",
-          "shading_position": "Own shading position",
-          "shading_conditions": "Only shade when"
-        },
-        "data_description": {
-          "window_entity": "While the window is open, the cover opens at least to the window position.",
-          "orientation": "Compass direction the window faces, or an azimuth in degrees.",
-          "shading_position": "Leave empty to use the room setting.",
-          "shading_conditions": "Optional. All conditions must be met to shade."
+        "title": "Cover {index} of {total}: {cover}",
+        "description": "Step 3 of 4 · Area {area}. Settings for **{cover}**.",
+        "sections": {
+          "window_section": {
+            "name": "Window",
+            "description": "While the window is open, the cover opens at least to the window position.",
+            "data": {
+              "window_entity": "Window sensor"
+            },
+            "data_description": {
+              "window_entity": "Leave empty if there is none."
+            }
+          },
+          "sun_section": {
+            "name": "Sun and shading",
+            "description": "When does the sun shine directly on this window, and how far should the cover close?",
+            "data": {
+              "orientation": "Window orientation",
+              "shading_position": "Own shading position",
+              "shading_conditions": "Only shade when"
+            },
+            "data_description": {
+              "orientation": "Compass direction the window faces, or an azimuth in degrees (e.g. 145).",
+              "shading_position": "Leave empty to use the room's shading position.",
+              "shading_conditions": "Optional. All conditions must be met to shade."
+            }
+          }
         }
       },
       "outdoor": {
         "title": "Outdoor sensors",
-        "description": "These apply to the whole house and are suggested for the next room.",
-        "data": {
-          "illuminance_entity": "Outdoor illuminance",
-          "temperature_entity": "Outdoor temperature",
-          "dusk_entity": "Dusk",
-          "presence_label": "Label of the house presence sensors"
-        },
-        "data_description": {
-          "dusk_entity": "Without it, sunset counts as dusk.",
-          "presence_label": "If none of these sensors is on, the house counts as empty."
+        "description": "Step 4 of 4: These apply to the whole house and are suggested for the next area.",
+        "sections": {
+          "outdoor_section": {
+            "name": "Outdoor",
+            "data": {
+              "illuminance_entity": "Outdoor illuminance",
+              "temperature_entity": "Outdoor temperature",
+              "dusk_entity": "Dusk"
+            },
+            "data_description": {
+              "illuminance_entity": "Used for shading and solar gain.",
+              "temperature_entity": "Used for cold protection.",
+              "dusk_entity": "Without it, sunset counts as dusk."
+            }
+          },
+          "house_section": {
+            "name": "Presence in the house",
+            "data": {
+              "presence_label": "Label of the presence sensors"
+            },
+            "data_description": {
+              "presence_label": "If none of these sensors is on, the house counts as empty. Without a label it always counts as occupied."
+            }
+          }
         }
       }
     },
     "error": {
       "no_covers": "Choose at least one cover.",
-      "invalid_conditions": "The conditions are invalid."
+      "invalid_conditions": "The shading conditions are invalid."
     },
     "abort": {
       "already_configured": "This area is already configured."
@@ -66,54 +111,97 @@
   "options": {
     "step": {
       "room": {
-        "title": "Covers in {area}",
-        "description": "Choose the covers and sensors of the room. Entities from the area are suggested.",
-        "data": {
-          "covers": "Covers",
-          "presence_entity": "Presence sensor",
-          "sleep_entity": "Sleep mode",
-          "climate_entity": "Heating/climate"
-        },
-        "data_description": {
-          "presence_entity": "When someone is present, covers open during the day.",
-          "sleep_entity": "Switch that indicates sleep mode. Without it there are no sleep settings.",
-          "climate_entity": "Heating or cooling decides whether sun is let in or blocked while nobody is home."
+        "title": "{area}: covers and sensors",
+        "description": "Entities from the area {area} are suggested.",
+        "sections": {
+          "covers_section": {
+            "name": "Covers",
+            "description": "The automation controls these covers. You set up each one next.",
+            "data": {
+              "covers": "Covers"
+            },
+            "data_description": {
+              "covers": "At least one cover."
+            }
+          },
+          "sensors_section": {
+            "name": "Room sensors",
+            "description": "All optional.",
+            "data": {
+              "presence_entity": "Presence sensor",
+              "sleep_entity": "Sleep mode",
+              "climate_entity": "Heating/climate"
+            },
+            "data_description": {
+              "presence_entity": "When someone is present, covers open during the day.",
+              "sleep_entity": "Switch that indicates sleep mode. Without it there are no sleep positions.",
+              "climate_entity": "Heating or cooling decides whether sun is let in or blocked while nobody is home."
+            }
+          }
         }
       },
       "cover": {
-        "title": "{cover}",
-        "description": "Settings for this cover.",
-        "data": {
-          "window_entity": "Window sensor",
-          "orientation": "Window orientation",
-          "shading_position": "Own shading position",
-          "shading_conditions": "Only shade when"
-        },
-        "data_description": {
-          "window_entity": "While the window is open, the cover opens at least to the window position.",
-          "orientation": "Compass direction the window faces, or an azimuth in degrees.",
-          "shading_position": "Leave empty to use the room setting.",
-          "shading_conditions": "Optional. All conditions must be met to shade."
+        "title": "Cover {index} of {total}: {cover}",
+        "description": "Area {area}. Settings for **{cover}**.",
+        "sections": {
+          "window_section": {
+            "name": "Window",
+            "description": "While the window is open, the cover opens at least to the window position.",
+            "data": {
+              "window_entity": "Window sensor"
+            },
+            "data_description": {
+              "window_entity": "Leave empty if there is none."
+            }
+          },
+          "sun_section": {
+            "name": "Sun and shading",
+            "description": "When does the sun shine directly on this window, and how far should the cover close?",
+            "data": {
+              "orientation": "Window orientation",
+              "shading_position": "Own shading position",
+              "shading_conditions": "Only shade when"
+            },
+            "data_description": {
+              "orientation": "Compass direction the window faces, or an azimuth in degrees (e.g. 145).",
+              "shading_position": "Leave empty to use the room's shading position.",
+              "shading_conditions": "Optional. All conditions must be met to shade."
+            }
+          }
         }
       },
       "outdoor": {
         "title": "Outdoor sensors",
-        "description": "These apply to the whole house and are suggested for the next room.",
-        "data": {
-          "illuminance_entity": "Outdoor illuminance",
-          "temperature_entity": "Outdoor temperature",
-          "dusk_entity": "Dusk",
-          "presence_label": "Label of the house presence sensors"
-        },
-        "data_description": {
-          "dusk_entity": "Without it, sunset counts as dusk.",
-          "presence_label": "If none of these sensors is on, the house counts as empty."
+        "description": "These apply to the whole house and are suggested for the next area.",
+        "sections": {
+          "outdoor_section": {
+            "name": "Outdoor",
+            "data": {
+              "illuminance_entity": "Outdoor illuminance",
+              "temperature_entity": "Outdoor temperature",
+              "dusk_entity": "Dusk"
+            },
+            "data_description": {
+              "illuminance_entity": "Used for shading and solar gain.",
+              "temperature_entity": "Used for cold protection.",
+              "dusk_entity": "Without it, sunset counts as dusk."
+            }
+          },
+          "house_section": {
+            "name": "Presence in the house",
+            "data": {
+              "presence_label": "Label of the presence sensors"
+            },
+            "data_description": {
+              "presence_label": "If none of these sensors is on, the house counts as empty. Without a label it always counts as occupied."
+            }
+          }
         }
       }
     },
     "error": {
       "no_covers": "Choose at least one cover.",
-      "invalid_conditions": "The conditions are invalid."
+      "invalid_conditions": "The shading conditions are invalid."
     }
   },
   "selector": {
