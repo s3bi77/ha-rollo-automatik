@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Set up room",
-        "description": "Per cover: suffix (required), direction 0–3, optional sunRule, overrideSunPos, cover, window. Without cover/window, cover.<prefix>_rollo_<suffix> and binary_sensor.<prefix>_<suffix>_geoffnet are used.",
+        "description": "Per cover: suffix (required), direction 0–3, optional sunRule, overrideSunPos, cover, window. Without cover/window, cover.PREFIX_rollo_SUFFIX and binary_sensor.PREFIX_SUFFIX_geoffnet are used.",
         "data": {
           "room_name": "Room name",
           "prefix": "Room prefix (e.g. kind_1, empty = from name)",
@@ -36,7 +36,7 @@
     "step": {
       "init": {
         "title": "Edit room",
-        "description": "Per cover: suffix (required), direction 0–3, optional sunRule, overrideSunPos, cover, window. Without cover/window, cover.<prefix>_rollo_<suffix> and binary_sensor.<prefix>_<suffix>_geoffnet are used.",
+        "description": "Per cover: suffix (required), direction 0–3, optional sunRule, overrideSunPos, cover, window. Without cover/window, cover.PREFIX_rollo_SUFFIX and binary_sensor.PREFIX_SUFFIX_geoffnet are used.",
         "data": {
           "rollos": "Covers (YAML list)",
           "lux_entity": "Outdoor illuminance",

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Raum einrichten",
-        "description": "Pro Rollo: suffix (Pflicht), direction 0–3, optional sunRule, overrideSunPos, cover, window. Ohne cover/window gilt cover.<präfix>_rollo_<suffix> und binary_sensor.<präfix>_<suffix>_geoffnet.",
+        "description": "Pro Rollo: suffix (Pflicht), direction 0–3, optional sunRule, overrideSunPos, cover, window. Ohne cover/window gilt cover.PRÄFIX_rollo_SUFFIX und binary_sensor.PRÄFIX_SUFFIX_geoffnet.",
         "data": {
           "room_name": "Raumname",
           "prefix": "Raum-Präfix (z.B. kind_1, leer = aus dem Namen)",
@@ -36,7 +36,7 @@
     "step": {
       "init": {
         "title": "Raum bearbeiten",
-        "description": "Pro Rollo: suffix (Pflicht), direction 0–3, optional sunRule, overrideSunPos, cover, window. Ohne cover/window gilt cover.<präfix>_rollo_<suffix> und binary_sensor.<präfix>_<suffix>_geoffnet.",
+        "description": "Pro Rollo: suffix (Pflicht), direction 0–3, optional sunRule, overrideSunPos, cover, window. Ohne cover/window gilt cover.PRÄFIX_rollo_SUFFIX und binary_sensor.PRÄFIX_SUFFIX_geoffnet.",
         "data": {
           "rollos": "Rollos (YAML-Liste)",
           "lux_entity": "Außenhelligkeit",
