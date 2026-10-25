@@ -1,0 +1,102 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Raum einrichten",
+        "description": "Pro Rollo: suffix (Pflicht), direction 0–3, optional sunRule, overrideSunPos, cover, window. Ohne cover/window gilt cover.<präfix>_rollo_<suffix> und binary_sensor.<präfix>_<suffix>_geoffnet.",
+        "data": {
+          "room_name": "Raumname",
+          "prefix": "Raum-Präfix (z.B. kind_1, leer = aus dem Namen)",
+          "sleep_mode": "Schlafmodus nutzen",
+          "rollos": "Rollos (YAML-Liste)",
+          "import_nodered": "Werte und Entity-IDs von Node-RED übernehmen",
+          "lux_entity": "Außenhelligkeit",
+          "temp_entity": "Außentemperatur",
+          "dusk_entity": "Dämmerung",
+          "azimuth_entity": "Sonnen-Azimut",
+          "elevation_entity": "Sonnenhöhe",
+          "presence_label": "Label der Präsenzmelder im Haus"
+        }
+      }
+    },
+    "error": {
+      "prefix": "Präfix darf nur Kleinbuchstaben, Ziffern und _ enthalten.",
+      "rollos_empty": "Mindestens ein Rollo angeben.",
+      "rollo_suffix": "Jedes Rollo braucht einen suffix aus Kleinbuchstaben, Ziffern und _.",
+      "rollo_unknown_key": "Unbekannter Schlüssel in der Rollo-Liste.",
+      "rollo_duplicate": "Ein suffix kommt doppelt vor.",
+      "rollo_direction": "direction muss 0, 1, 2 oder 3 sein.",
+      "rollo_sun_rule": "sunRule hat ein ungültiges Format."
+    },
+    "abort": {
+      "already_configured": "Dieser Raum ist schon eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Raum bearbeiten",
+        "description": "Pro Rollo: suffix (Pflicht), direction 0–3, optional sunRule, overrideSunPos, cover, window. Ohne cover/window gilt cover.<präfix>_rollo_<suffix> und binary_sensor.<präfix>_<suffix>_geoffnet.",
+        "data": {
+          "rollos": "Rollos (YAML-Liste)",
+          "lux_entity": "Außenhelligkeit",
+          "temp_entity": "Außentemperatur",
+          "dusk_entity": "Dämmerung",
+          "azimuth_entity": "Sonnen-Azimut",
+          "elevation_entity": "Sonnenhöhe",
+          "presence_label": "Label der Präsenzmelder im Haus"
+        }
+      }
+    },
+    "error": {
+      "prefix": "Präfix darf nur Kleinbuchstaben, Ziffern und _ enthalten.",
+      "rollos_empty": "Mindestens ein Rollo angeben.",
+      "rollo_suffix": "Jedes Rollo braucht einen suffix aus Kleinbuchstaben, Ziffern und _.",
+      "rollo_unknown_key": "Unbekannter Schlüssel in der Rollo-Liste.",
+      "rollo_duplicate": "Ein suffix kommt doppelt vor.",
+      "rollo_direction": "direction muss 0, 1, 2 oder 3 sein.",
+      "rollo_sun_rule": "sunRule hat ein ungültiges Format."
+    }
+  },
+  "entity": {
+    "number": {
+      "zielposition_schlafmodus": {
+        "name": "Zielposition Schlafmodus"
+      },
+      "zielposition_schlafmodus_fenster_offen": {
+        "name": "Zielposition Schlafmodus Fenster Offen"
+      },
+      "zielposition_fenster_offen": {
+        "name": "Zielposition Fenster Offen"
+      },
+      "zielposition_beschattung": {
+        "name": "Zielposition Beschattung"
+      },
+      "lux_threshold": {
+        "name": "Lux Threshold"
+      },
+      "lux_hysteresis": {
+        "name": "Lux Hysteresis"
+      },
+      "kalte_threshold": {
+        "name": "Kälte Threshold"
+      },
+      "automatik_totzone": {
+        "name": "Automatik Totzone"
+      }
+    },
+    "switch": {
+      "automatik_aktiv": {
+        "name": "Automatik Aktiv"
+      },
+      "automatische_beschattung": {
+        "name": "Automatische Beschattung"
+      }
+    },
+    "sensor": {
+      "automatik_status": {
+        "name": "Automatik Status"
+      }
+    }
+  }
+}

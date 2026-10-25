@@ -1,0 +1,15 @@
+{
+  "domain": "rollo_automatik",
+  "name": "Rollo Automatik",
+  "codeowners": [
+    "@s3bi77"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/s3bi77/ha-rollo-automatik",
+  "integration_type": "device",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/s3bi77/ha-rollo-automatik/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

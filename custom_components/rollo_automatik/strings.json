@@ -1,0 +1,102 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up room",
+        "description": "Per cover: suffix (required), direction 0–3, optional sunRule, overrideSunPos, cover, window. Without cover/window, cover.<prefix>_rollo_<suffix> and binary_sensor.<prefix>_<suffix>_geoffnet are used.",
+        "data": {
+          "room_name": "Room name",
+          "prefix": "Room prefix (e.g. kind_1, empty = from name)",
+          "sleep_mode": "Use sleep mode",
+          "rollos": "Covers (YAML list)",
+          "import_nodered": "Take over values and entity IDs from Node-RED",
+          "lux_entity": "Outdoor illuminance",
+          "temp_entity": "Outdoor temperature",
+          "dusk_entity": "Dusk",
+          "azimuth_entity": "Sun azimuth",
+          "elevation_entity": "Sun elevation",
+          "presence_label": "Label of the house presence sensors"
+        }
+      }
+    },
+    "error": {
+      "prefix": "Prefix may only contain lowercase letters, digits and _.",
+      "rollos_empty": "Add at least one cover.",
+      "rollo_suffix": "Each cover needs a suffix of lowercase letters, digits and _.",
+      "rollo_unknown_key": "Unknown key in the cover list.",
+      "rollo_duplicate": "A suffix is used twice.",
+      "rollo_direction": "direction must be 0, 1, 2 or 3.",
+      "rollo_sun_rule": "sunRule has an invalid format."
+    },
+    "abort": {
+      "already_configured": "This room is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Edit room",
+        "description": "Per cover: suffix (required), direction 0–3, optional sunRule, overrideSunPos, cover, window. Without cover/window, cover.<prefix>_rollo_<suffix> and binary_sensor.<prefix>_<suffix>_geoffnet are used.",
+        "data": {
+          "rollos": "Covers (YAML list)",
+          "lux_entity": "Outdoor illuminance",
+          "temp_entity": "Outdoor temperature",
+          "dusk_entity": "Dusk",
+          "azimuth_entity": "Sun azimuth",
+          "elevation_entity": "Sun elevation",
+          "presence_label": "Label of the house presence sensors"
+        }
+      }
+    },
+    "error": {
+      "prefix": "Prefix may only contain lowercase letters, digits and _.",
+      "rollos_empty": "Add at least one cover.",
+      "rollo_suffix": "Each cover needs a suffix of lowercase letters, digits and _.",
+      "rollo_unknown_key": "Unknown key in the cover list.",
+      "rollo_duplicate": "A suffix is used twice.",
+      "rollo_direction": "direction must be 0, 1, 2 or 3.",
+      "rollo_sun_rule": "sunRule has an invalid format."
+    }
+  },
+  "entity": {
+    "number": {
+      "zielposition_schlafmodus": {
+        "name": "Sleep position"
+      },
+      "zielposition_schlafmodus_fenster_offen": {
+        "name": "Sleep position window open"
+      },
+      "zielposition_fenster_offen": {
+        "name": "Window open position"
+      },
+      "zielposition_beschattung": {
+        "name": "Shading position"
+      },
+      "lux_threshold": {
+        "name": "Lux threshold"
+      },
+      "lux_hysteresis": {
+        "name": "Lux hysteresis"
+      },
+      "kalte_threshold": {
+        "name": "Cold threshold"
+      },
+      "automatik_totzone": {
+        "name": "Dead band"
+      }
+    },
+    "switch": {
+      "automatik_aktiv": {
+        "name": "Automation active"
+      },
+      "automatische_beschattung": {
+        "name": "Automatic shading"
+      }
+    },
+    "sensor": {
+      "automatik_status": {
+        "name": "Automation status"
+      }
+    }
+  }
+}
