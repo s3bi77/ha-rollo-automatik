@@ -101,7 +101,8 @@ class RoomController:
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
             identifiers={(DOMAIN, self.entry.entry_id)},
-            name=f"{self.area_name} Rollos",
+            # Der Bereich steht schon am Gerät; HA stellt ihn der Entity-ID voran
+            name="Rollos",
             manufacturer="Rollo Automatik",
             model="Raumsteuerung",
             suggested_area=self.area_name,

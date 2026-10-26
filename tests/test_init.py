@@ -250,3 +250,20 @@ async def test_options_flow_keeps_cover_settings(hass: HomeAssistant, area: str)
     await hass.async_block_till_done()
     assert entry.options["covers"][0]["orientation"] == "w"
     assert entry.options["dusk_entity"] == "binary_sensor.dammerung"
+
+
+async def test_fixes_doubled_area_in_entity_ids(hass: HomeAssistant, area: str) -> None:
+    data = room_data(area)
+    entry = MockConfigEntry(domain=DOMAIN, data=data, unique_id=area, title="Kind 1", version=2)
+    entry.add_to_hass(hass)
+    er.async_get(hass).async_get_or_create(
+        "switch",
+        DOMAIN,
+        f"{entry.entry_id}_automation",
+        config_entry=entry,
+        suggested_object_id="kind_1_kind_1_rollos_automatik",
+    )
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert hass.states.get("switch.kind_1_rollos_automatik") is not None
+    assert hass.states.get("switch.kind_1_kind_1_rollos_automatik") is None

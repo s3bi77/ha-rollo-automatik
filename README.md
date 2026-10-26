@@ -13,7 +13,7 @@ Einstellungen → Geräte & Dienste → Integration hinzufügen → „Rollo Aut
 
 Alles lässt sich später über „Konfigurieren“ ändern.
 
-Jeder Raum bekommt ein Gerät „<Bereich> Rollos“ im Bereich:
+Jeder Raum bekommt ein Gerät „Rollos“ im Bereich. Die Entity-IDs setzt Home Assistant aus Bereich, Gerät und Entität zusammen, z.B. `switch.wohnzimmer_rollos_automatik`:
 
 | Entität | Zweck |
 |---|---|
@@ -53,7 +53,7 @@ Die drei Schlaf- und Fensterpositionen halten sich gegenseitig in der Reihenfolg
 ## Installation über HACS
 
 1. HACS → Benutzerdefinierte Repositories → `https://github.com/s3bi77/ha-rollo-automatik`, Typ „Integration“.
-2. „Rollo Automatik“ installieren und Home Assistant neu starten.
+2. „Rollo Automatik“ installieren und Home Assistant neu starten. Benötigt Home Assistant 2026.3 oder neuer.
 
 ## Entwicklung
 
