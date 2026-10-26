@@ -9,7 +9,7 @@ Einstellungen → Geräte & Dienste → Integration hinzufügen → „Rollo Aut
 1. **Bereich** wählen. Angeboten werden Bereiche mit Rollos.
 2. **Raum:** Rollos des Bereichs, Präsenzmelder, optional Schlafmodus-Schalter und Heizung/Klima. Vorgeschlagen werden Entitäten aus dem Bereich.
 3. **Je Rollo:** Fensterkontakt, Ausrichtung des Fensters (Himmelsrichtung oder Azimut in Grad), optional eine eigene Beschattungsposition und Bedingungen, wann beschattet werden darf. Die Bedingungen sind normale Home-Assistant-Bedingungen.
-4. **Außensensoren:** Außenhelligkeit, Außentemperatur, optional Dämmerung und das Label der Präsenzmelder im Haus. Beim nächsten Raum werden diese Werte vorgeschlagen.
+4. **Außensensoren:** Außenhelligkeit, Außentemperatur, optional Dämmerung und ein Binärsensor für die Präsenz im Haus. Beim nächsten Raum werden diese Werte vorgeschlagen.
 
 Alles lässt sich später über „Konfigurieren“ ändern.
 
@@ -46,7 +46,7 @@ Die Sonne gilt als direkt, wenn ihr Azimut höchstens 65° von der Ausrichtung d
 
 Gefahren wird nur, wenn sich die greifenden Regeln seit der letzten Auswertung geändert haben und die Abweichung größer als die Totzone ist. Von Hand verstellte Rollos bleiben so in Ruhe, bis sich die Lage ändert.
 
-Anwesenheit bleibt nach einmaliger Erkennung gesetzt, bis kein Präsenzmelder mit dem gewählten Label mehr an ist. Nach einer Fahrt bei Abwesenheit wird sie 4 Minuten ignoriert, damit das fahrende Rollo den Melder nicht auslöst.
+Anwesenheit bleibt nach einmaliger Erkennung gesetzt, bis der Sensor für die Präsenz im Haus aus ist. Nach einer Fahrt bei Abwesenheit wird sie 4 Minuten ignoriert, damit das fahrende Rollo den Melder nicht auslöst.
 
 Die drei Schlaf- und Fensterpositionen halten sich gegenseitig in der Reihenfolge Schlafposition ≤ Schlafposition bei offenem Fenster ≤ Position bei offenem Fenster.
 

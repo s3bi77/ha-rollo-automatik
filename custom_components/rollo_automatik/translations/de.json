@@ -91,10 +91,10 @@
           "house_section": {
             "name": "Anwesenheit im Haus",
             "data": {
-              "presence_label": "Label der Präsenzmelder"
+              "house_presence_entity": "Präsenz im Haus"
             },
             "data_description": {
-              "presence_label": "Ist keiner dieser Melder aktiv, gilt das Haus als leer. Ohne Label gilt es immer als bewohnt."
+              "house_presence_entity": "Ist er aus, gilt das Haus als leer. Ohne Sensor gilt es immer als bewohnt."
             }
           }
         }
@@ -190,10 +190,10 @@
           "house_section": {
             "name": "Anwesenheit im Haus",
             "data": {
-              "presence_label": "Label der Präsenzmelder"
+              "house_presence_entity": "Präsenz im Haus"
             },
             "data_description": {
-              "presence_label": "Ist keiner dieser Melder aktiv, gilt das Haus als leer. Ohne Label gilt es immer als bewohnt."
+              "house_presence_entity": "Ist er aus, gilt das Haus als leer. Ohne Sensor gilt es immer als bewohnt."
             }
           }
         }

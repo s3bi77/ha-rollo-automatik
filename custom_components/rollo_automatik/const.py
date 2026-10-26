@@ -24,13 +24,13 @@ CONF_SHADING_CONDITIONS = "shading_conditions"
 CONF_ILLUMINANCE_ENTITY = "illuminance_entity"
 CONF_TEMPERATURE_ENTITY = "temperature_entity"
 CONF_DUSK_ENTITY = "dusk_entity"
-CONF_PRESENCE_LABEL = "presence_label"
+CONF_HOUSE_PRESENCE_ENTITY = "house_presence_entity"
 
 OUTDOOR_KEYS = (
     CONF_ILLUMINANCE_ENTITY,
     CONF_TEMPERATURE_ENTITY,
     CONF_DUSK_ENTITY,
-    CONF_PRESENCE_LABEL,
+    CONF_HOUSE_PRESENCE_ENTITY,
 )
 
 SUN_ENTITY = "sun.sun"

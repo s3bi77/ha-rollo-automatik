@@ -8,7 +8,7 @@ import time
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
+from homeassistant.const import STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import area_registry as ar, condition, entity_registry as er
@@ -21,10 +21,10 @@ from .const import (
     CONF_COVER_ENTITY,
     CONF_COVERS,
     CONF_DUSK_ENTITY,
+    CONF_HOUSE_PRESENCE_ENTITY,
     CONF_ILLUMINANCE_ENTITY,
     CONF_ORIENTATION,
     CONF_PRESENCE_ENTITY,
-    CONF_PRESENCE_LABEL,
     CONF_SHADING_CONDITIONS,
     CONF_SHADING_POSITION,
     CONF_SLEEP_ENTITY,
@@ -71,7 +71,7 @@ class RoomController:
         self.illuminance_entity: str | None = conf.get(CONF_ILLUMINANCE_ENTITY)
         self.temperature_entity: str | None = conf.get(CONF_TEMPERATURE_ENTITY)
         self.dusk_entity: str | None = conf.get(CONF_DUSK_ENTITY)
-        self.presence_label: str | None = conf.get(CONF_PRESENCE_LABEL)
+        self.house_presence_entity: str | None = conf.get(CONF_HOUSE_PRESENCE_ENTITY)
 
         self.cover_conf: list[dict[str, Any]] = conf.get(CONF_COVERS, [])
         self.covers = [
@@ -134,9 +134,6 @@ class RoomController:
         self._unsub.append(
             async_track_state_change_event(self.hass, self._watched_entities(), self._on_state_change)
         )
-        self._unsub.append(
-            self.hass.bus.async_listen(er.EVENT_ENTITY_REGISTRY_UPDATED, self._on_registry_updated)
-        )
 
     @callback
     def async_stop(self) -> None:
@@ -145,31 +142,14 @@ class RoomController:
         self._unsub.clear()
         self._ready = False
 
-    @callback
-    def _on_registry_updated(self, event: Event) -> None:
-        # Ein Label kann neu vergeben worden sein: Präsenzmelder neu abonnieren
-        if event.data.get("action") != "update" or "labels" not in event.data.get("changes", {}):
-            return
-        self.async_stop()
-        self.async_start()
-
-    def _house_presence_entities(self) -> list[str]:
-        if not self.presence_label:
-            return []
-        registry = er.async_get(self.hass)
-        return [e.entity_id for e in er.async_entries_for_label(registry, self.presence_label)]
-
     def _watched_entities(self) -> list[str]:
-        entities = {
-            SUN_ENTITY,
-            *self._house_presence_entities(),
-            *self._condition_entities,
-        }
+        entities = {SUN_ENTITY, *self._condition_entities}
         for entity_id in (
             self.illuminance_entity,
             self.temperature_entity,
             self.dusk_entity,
             self.presence_entity,
+            self.house_presence_entity,
             self.sleep_entity,
             self.climate_entity,
         ):
@@ -258,10 +238,8 @@ class RoomController:
         return self._state(SUN_ENTITY) == "below_horizon"
 
     def _inputs(self) -> Inputs:
-        if self.presence_label:
-            house = any(self._state(e) == STATE_ON for e in self._house_presence_entities())
-        else:
-            house = True
+        # Ohne Sensor oder bei unbekanntem Zustand gilt das Haus als bewohnt
+        house = self._state(self.house_presence_entity) != STATE_OFF if self.house_presence_entity else True
         return Inputs(
             illuminance=self._float(self.illuminance_entity),
             temperature=self._float(self.temperature_entity),

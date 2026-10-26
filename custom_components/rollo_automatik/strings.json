@@ -91,10 +91,10 @@
           "house_section": {
             "name": "Presence in the house",
             "data": {
-              "presence_label": "Label of the presence sensors"
+              "house_presence_entity": "House presence"
             },
             "data_description": {
-              "presence_label": "If none of these sensors is on, the house counts as empty. Without a label it always counts as occupied."
+              "house_presence_entity": "If it is off, the house counts as empty. Without a sensor it always counts as occupied."
             }
           }
         }
@@ -190,10 +190,10 @@
           "house_section": {
             "name": "Presence in the house",
             "data": {
-              "presence_label": "Label of the presence sensors"
+              "house_presence_entity": "House presence"
             },
             "data_description": {
-              "presence_label": "If none of these sensors is on, the house counts as empty. Without a label it always counts as occupied."
+              "house_presence_entity": "If it is off, the house counts as empty. Without a sensor it always counts as occupied."
             }
           }
         }

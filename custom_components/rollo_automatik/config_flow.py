@@ -27,7 +27,7 @@ from .const import (
     CONF_ILLUMINANCE_ENTITY,
     CONF_ORIENTATION,
     CONF_PRESENCE_ENTITY,
-    CONF_PRESENCE_LABEL,
+    CONF_HOUSE_PRESENCE_ENTITY,
     CONF_SHADING_CONDITIONS,
     CONF_SHADING_POSITION,
     CONF_SLEEP_ENTITY,
@@ -263,7 +263,7 @@ class _RoomSteps:
                 key: values.get(key)
                 for key in (CONF_ILLUMINANCE_ENTITY, CONF_TEMPERATURE_ENTITY, CONF_DUSK_ENTITY)
             },
-            SECTION_HOUSE: {CONF_PRESENCE_LABEL: values.get(CONF_PRESENCE_LABEL)},
+            SECTION_HOUSE: {CONF_HOUSE_PRESENCE_ENTITY: values.get(CONF_HOUSE_PRESENCE_ENTITY)},
         }
         schema = vol.Schema(
             {
@@ -283,7 +283,13 @@ class _RoomSteps:
                     )
                 ),
                 vol.Required(SECTION_HOUSE): section(
-                    vol.Schema({vol.Optional(CONF_PRESENCE_LABEL): selector.LabelSelector()})
+                    vol.Schema(
+                        {
+                            vol.Optional(CONF_HOUSE_PRESENCE_ENTITY): selector.EntitySelector(
+                                selector.EntitySelectorConfig(domain=["binary_sensor", "input_boolean"])
+                            )
+                        }
+                    )
                 ),
             }
         )

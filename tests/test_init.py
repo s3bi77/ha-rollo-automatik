@@ -5,7 +5,7 @@ from __future__ import annotations
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from homeassistant.helpers import area_registry as ar, entity_registry as er, label_registry as lr
+from homeassistant.helpers import area_registry as ar, entity_registry as er
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_mock_service
 
@@ -51,7 +51,7 @@ def room_data(area_id: str, **overrides) -> dict:
         "illuminance_entity": None,
         "temperature_entity": None,
         "dusk_entity": "binary_sensor.dammerung",
-        "presence_label": None,
+        "house_presence_entity": None,
     }
     data.update(overrides)
     return data
@@ -126,13 +126,12 @@ async def test_automation_switch_off_blocks(hass: HomeAssistant, area: str) -> N
     assert calls == []
 
 
-async def test_house_presence_from_label(hass: HomeAssistant, area: str) -> None:
+async def test_house_presence_sensor(hass: HomeAssistant, area: str) -> None:
     calls = async_mock_service(hass, "cover", "set_cover_position")
-    label = lr.async_get(hass).async_create("Präsenz")
-    er.async_get(hass).async_update_entity("binary_sensor.kind_1_anwesenheit", labels={label.label_id})
     hass.states.async_set(COVER, "closed", {"current_position": 0})
+    hass.states.async_set("binary_sensor.haus_anwesend", "on")
     hass.states.async_set("binary_sensor.kind_1_anwesenheit", "off")
-    await _setup(hass, room_data(area, presence_label=label.label_id))
+    await _setup(hass, room_data(area, house_presence_entity="binary_sensor.haus_anwesend"))
 
     hass.states.async_set("binary_sensor.kind_1_anwesenheit", "on")
     await hass.async_block_till_done()

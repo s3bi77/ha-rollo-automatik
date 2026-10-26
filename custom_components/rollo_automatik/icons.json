@@ -1,0 +1,27 @@
+{
+  "entity": {
+    "number": {
+      "sleep_position": { "default": "mdi:bed" },
+      "sleep_window_position": { "default": "mdi:bed-clock" },
+      "window_position": { "default": "mdi:window-open-variant" },
+      "shading_position": { "default": "mdi:blinds-horizontal" },
+      "illuminance_threshold": { "default": "mdi:brightness-percent" },
+      "illuminance_hysteresis": { "default": "mdi:sine-wave" },
+      "cold_threshold": { "default": "mdi:snowflake-thermometer" },
+      "deadband": { "default": "mdi:arrow-collapse-vertical" }
+    },
+    "switch": {
+      "automation": {
+        "default": "mdi:window-shutter-auto",
+        "state": { "off": "mdi:hand-back-right" }
+      },
+      "shading": {
+        "default": "mdi:sun-angle",
+        "state": { "off": "mdi:weather-sunny-off" }
+      }
+    },
+    "sensor": {
+      "status": { "default": "mdi:information-outline" }
+    }
+  }
+}
