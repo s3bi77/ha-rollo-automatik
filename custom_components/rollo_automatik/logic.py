@@ -7,6 +7,7 @@ testen lässt.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import math
 
 # Nach einer Fahrt bei Abwesenheit wird die Präsenz kurz ignoriert, damit der
 # fahrende Rollo den Präsenzmelder nicht selbst auslöst.
@@ -20,6 +21,8 @@ COLD_HYSTERESIS = 1.0
 SUN_HALF_ANGLE = 65
 SUN_MIN_ELEVATION = 10
 SUN_MAX_ELEVATION = 80
+# Mit bekannter Fenstergröße: Anteil der Glasfläche, der mindestens besonnt sein muss
+SUN_MIN_LIT = 0.25
 
 REASON_DUSK = "Dämmerung"
 REASON_PRESENCE = "Anwesenheit"
@@ -42,6 +45,10 @@ class CoverConfig:
     orientation: float = 180
     # Beschattungsposition für dieses Rollo statt der Raum-Einstellung
     shading_position: float | None = None
+    # Fenstergröße und Laibungstiefe in Metern; ohne Größe gilt ein fester Winkel
+    width: float | None = None
+    height: float | None = None
+    reveal: float = 0.25
 
 
 @dataclass
@@ -119,12 +126,38 @@ class Result:
         return [c for c in self.covers if c.move]
 
 
-def is_sun_direct(azimuth: float | None, elevation: float | None, orientation: float) -> bool:
+def lit_fraction(deviation: float, elevation: float, width: float, height: float, reveal: float) -> float:
+    """Anteil der Glasfläche, den die Laibung nicht verschattet.
+
+    Seitlich wirft die Laibung einen Schatten von reveal * tan(Abweichung),
+    oben der Sturz einen von reveal * tan(Profilwinkel).
+    """
+    if deviation >= 90 or elevation <= 0:
+        return 0.0
+    dev = math.radians(deviation)
+    profile = math.atan(math.tan(math.radians(elevation)) / math.cos(dev))
+    horizontal = max(0.0, 1 - reveal * math.tan(dev) / width)
+    vertical = max(0.0, 1 - reveal * math.tan(profile) / height)
+    return horizontal * vertical
+
+
+def is_sun_direct(
+    azimuth: float | None,
+    elevation: float | None,
+    orientation: float,
+    width: float | None = None,
+    height: float | None = None,
+    reveal: float = 0.25,
+) -> bool:
     """Scheint die Sonne direkt auf ein Fenster mit dieser Ausrichtung?"""
     if azimuth is None or elevation is None:
         return False
     deviation = abs((azimuth - orientation + 180) % 360 - 180)
-    return deviation < SUN_HALF_ANGLE and SUN_MIN_ELEVATION < elevation < SUN_MAX_ELEVATION
+    if not SUN_MIN_ELEVATION < elevation < SUN_MAX_ELEVATION:
+        return False
+    if width and height:
+        return lit_fraction(deviation, elevation, width, height, reveal) >= SUN_MIN_LIT
+    return deviation < SUN_HALF_ANGLE
 
 
 def evaluate(
@@ -169,7 +202,14 @@ def evaluate(
         key = cover.cover_entity
         window_open = inputs.window_open.get(key, False)
         position = inputs.cover_position.get(key)
-        sun_direct = is_sun_direct(inputs.sun_azimuth, inputs.sun_elevation, cover.orientation)
+        sun_direct = is_sun_direct(
+            inputs.sun_azimuth,
+            inputs.sun_elevation,
+            cover.orientation,
+            cover.width,
+            cover.height,
+            cover.reveal,
+        )
 
         target: float | None = None
         constraints: list[tuple[str, float]] = []

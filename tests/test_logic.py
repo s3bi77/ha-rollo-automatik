@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from custom_components.rollo_automatik.logic import (
@@ -16,6 +18,7 @@ from custom_components.rollo_automatik.logic import (
     cascade_positions,
     evaluate,
     is_sun_direct,
+    lit_fraction,
 )
 
 COVER = "cover.kind_1_fenster"
@@ -174,6 +177,26 @@ def test_without_sleep_settings_sleep_is_ignored():
 )
 def test_sun_direct(azimuth, elevation, orientation, expected):
     assert is_sun_direct(azimuth, elevation, orientation) is expected
+
+
+def test_lit_fraction():
+    assert lit_fraction(0, 30, 1.0, 1.0, 0.25) == pytest.approx(1 - 0.25 * math.tan(math.radians(30)))
+    assert lit_fraction(90, 30, 1.0, 1.0, 0.25) == 0
+    assert lit_fraction(10, -1, 1.0, 1.0, 0.25) == 0
+
+
+@pytest.mark.parametrize(
+    ("deviation", "width", "height", "expected"),
+    [
+        (60, 0.9, 2.55, True),
+        (75, 0.9, 2.55, False),
+        # Breites Fenster: auch bei 70° fällt noch viel Sonne ein
+        (70, 2.5, 1.12, True),
+        (70, None, None, False),
+    ],
+)
+def test_sun_direct_with_window_size(deviation, width, height, expected):
+    assert is_sun_direct(180 + deviation, 30, 180, width, height, 0.25) is expected
 
 
 def test_cascade_positions():

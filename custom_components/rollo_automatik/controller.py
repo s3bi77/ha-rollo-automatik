@@ -25,12 +25,16 @@ from .const import (
     CONF_ILLUMINANCE_ENTITY,
     CONF_ORIENTATION,
     CONF_PRESENCE_ENTITY,
+    CONF_REVEAL_DEPTH,
     CONF_SHADING_CONDITIONS,
     CONF_SHADING_POSITION,
     CONF_SLEEP_ENTITY,
     CONF_TEMPERATURE_ENTITY,
     CONF_WINDOW_ENTITY,
+    CONF_WINDOW_HEIGHT,
+    CONF_WINDOW_WIDTH,
     DEFAULT_ORIENTATION,
+    DEFAULT_REVEAL_DEPTH,
     DOMAIN,
     NUMBERS,
     ORIENTATIONS,
@@ -80,6 +84,9 @@ class RoomController:
                 window_entity=c.get(CONF_WINDOW_ENTITY),
                 orientation=orientation_degrees(c.get(CONF_ORIENTATION, DEFAULT_ORIENTATION)),
                 shading_position=c.get(CONF_SHADING_POSITION),
+                width=c.get(CONF_WINDOW_WIDTH),
+                height=c.get(CONF_WINDOW_HEIGHT),
+                reveal=(c.get(CONF_REVEAL_DEPTH) or DEFAULT_REVEAL_DEPTH) / 100,
             )
             for c in self.cover_conf
         ]

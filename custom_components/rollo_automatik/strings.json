@@ -47,12 +47,18 @@
         "sections": {
           "window_section": {
             "name": "Window",
-            "description": "While the window is open, the cover opens at least to the window position.",
+            "description": "While the window is open the cover moves at least to the window position. Width and height refine when the sun counts as direct.",
             "data": {
-              "window_entity": "Window sensor"
+              "window_entity": "Window sensor",
+              "window_width": "Window width",
+              "window_height": "Window height",
+              "reveal_depth": "Reveal depth"
             },
             "data_description": {
-              "window_entity": "Leave empty if there is none."
+              "window_entity": "Leave empty if there is none.",
+              "window_width": "Clear width of the glazing. With width and height the integration calculates how much sun actually gets past the reveal onto the glass.",
+              "window_height": "Clear height of the glazing.",
+              "reveal_depth": "Distance from the outer wall face to the glass. Default 25 cm."
             }
           },
           "sun_section": {
@@ -146,12 +152,18 @@
         "sections": {
           "window_section": {
             "name": "Window",
-            "description": "While the window is open, the cover opens at least to the window position.",
+            "description": "While the window is open the cover moves at least to the window position. Width and height refine when the sun counts as direct.",
             "data": {
-              "window_entity": "Window sensor"
+              "window_entity": "Window sensor",
+              "window_width": "Window width",
+              "window_height": "Window height",
+              "reveal_depth": "Reveal depth"
             },
             "data_description": {
-              "window_entity": "Leave empty if there is none."
+              "window_entity": "Leave empty if there is none.",
+              "window_width": "Clear width of the glazing. With width and height the integration calculates how much sun actually gets past the reveal onto the glass.",
+              "window_height": "Clear height of the glazing.",
+              "reveal_depth": "Distance from the outer wall face to the glass. Default 25 cm."
             }
           },
           "sun_section": {

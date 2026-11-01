@@ -19,6 +19,10 @@ CONF_WINDOW_ENTITY = "window_entity"
 CONF_ORIENTATION = "orientation"
 CONF_SHADING_POSITION = "shading_position"
 CONF_SHADING_CONDITIONS = "shading_conditions"
+CONF_WINDOW_WIDTH = "window_width"
+CONF_WINDOW_HEIGHT = "window_height"
+CONF_REVEAL_DEPTH = "reveal_depth"
+DEFAULT_REVEAL_DEPTH = 25
 
 # Außen
 CONF_ILLUMINANCE_ENTITY = "illuminance_entity"

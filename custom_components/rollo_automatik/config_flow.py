@@ -33,6 +33,9 @@ from .const import (
     CONF_SLEEP_ENTITY,
     CONF_TEMPERATURE_ENTITY,
     CONF_WINDOW_ENTITY,
+    CONF_WINDOW_HEIGHT,
+    CONF_WINDOW_WIDTH,
+    CONF_REVEAL_DEPTH,
     DEFAULT_ORIENTATION,
     DOMAIN,
     ORIENTATIONS,
@@ -81,6 +84,14 @@ def _entity_selector(
     if candidates:
         config["include_entities"] = candidates
     return selector.EntitySelector(selector.EntitySelectorConfig(**config))
+
+
+def _length_selector(minimum: float, maximum: float, step: float, unit: str) -> selector.NumberSelector:
+    return selector.NumberSelector(
+        selector.NumberSelectorConfig(
+            min=minimum, max=maximum, step=step, unit_of_measurement=unit, mode=selector.NumberSelectorMode.BOX
+        )
+    )
 
 
 def _first(candidates: list[str]) -> str | None:
@@ -178,6 +189,9 @@ class _RoomSteps:
                     {
                         CONF_COVER_ENTITY: cover_id,
                         CONF_WINDOW_ENTITY: window.get(CONF_WINDOW_ENTITY),
+                        CONF_WINDOW_WIDTH: window.get(CONF_WINDOW_WIDTH),
+                        CONF_WINDOW_HEIGHT: window.get(CONF_WINDOW_HEIGHT),
+                        CONF_REVEAL_DEPTH: window.get(CONF_REVEAL_DEPTH),
                         CONF_ORIENTATION: sun.get(CONF_ORIENTATION) or DEFAULT_ORIENTATION,
                         CONF_SHADING_POSITION: sun.get(CONF_SHADING_POSITION),
                         CONF_SHADING_CONDITIONS: conditions,
@@ -193,6 +207,9 @@ class _RoomSteps:
         suggested = user_input or {
             SECTION_WINDOW: {
                 CONF_WINDOW_ENTITY: previous.get(CONF_WINDOW_ENTITY, _first(windows)),
+                CONF_WINDOW_WIDTH: previous.get(CONF_WINDOW_WIDTH),
+                CONF_WINDOW_HEIGHT: previous.get(CONF_WINDOW_HEIGHT),
+                CONF_REVEAL_DEPTH: previous.get(CONF_REVEAL_DEPTH),
             },
             SECTION_SUN: {
                 CONF_ORIENTATION: previous.get(CONF_ORIENTATION, DEFAULT_ORIENTATION),
@@ -204,7 +221,12 @@ class _RoomSteps:
             {
                 vol.Required(SECTION_WINDOW): section(
                     vol.Schema(
-                        {vol.Optional(CONF_WINDOW_ENTITY): _entity_selector(["binary_sensor"], windows)}
+                        {
+                            vol.Optional(CONF_WINDOW_ENTITY): _entity_selector(["binary_sensor"], windows),
+                            vol.Optional(CONF_WINDOW_WIDTH): _length_selector(0.2, 6, 0.01, "m"),
+                            vol.Optional(CONF_WINDOW_HEIGHT): _length_selector(0.2, 4, 0.01, "m"),
+                            vol.Optional(CONF_REVEAL_DEPTH): _length_selector(0, 80, 1, "cm"),
+                        }
                     )
                 ),
                 vol.Required(SECTION_SUN): section(

@@ -47,12 +47,18 @@
         "sections": {
           "window_section": {
             "name": "Fenster",
-            "description": "Solange das Fenster offen ist, fährt das Rollo mindestens auf die Fensterposition.",
+            "description": "Solange das Fenster offen ist, fährt das Rollo mindestens auf die Fensterposition. Breite und Höhe verfeinern, ab wann die Sonne direkt einfällt.",
             "data": {
-              "window_entity": "Fensterkontakt"
+              "window_entity": "Fensterkontakt",
+              "window_width": "Fensterbreite",
+              "window_height": "Fensterhöhe",
+              "reveal_depth": "Laibungstiefe"
             },
             "data_description": {
-              "window_entity": "Leer lassen, wenn es keinen gibt."
+              "window_entity": "Leer lassen, wenn es keinen gibt.",
+              "window_width": "Lichte Breite der Glasfläche. Mit Breite und Höhe wird berechnet, wie viel Sonne tatsächlich am Rahmen vorbei auf das Glas fällt.",
+              "window_height": "Lichte Höhe der Glasfläche.",
+              "reveal_depth": "Abstand von der Außenkante der Wand bis zum Glas. Standard 25 cm."
             }
           },
           "sun_section": {
@@ -146,12 +152,18 @@
         "sections": {
           "window_section": {
             "name": "Fenster",
-            "description": "Solange das Fenster offen ist, fährt das Rollo mindestens auf die Fensterposition.",
+            "description": "Solange das Fenster offen ist, fährt das Rollo mindestens auf die Fensterposition. Breite und Höhe verfeinern, ab wann die Sonne direkt einfällt.",
             "data": {
-              "window_entity": "Fensterkontakt"
+              "window_entity": "Fensterkontakt",
+              "window_width": "Fensterbreite",
+              "window_height": "Fensterhöhe",
+              "reveal_depth": "Laibungstiefe"
             },
             "data_description": {
-              "window_entity": "Leer lassen, wenn es keinen gibt."
+              "window_entity": "Leer lassen, wenn es keinen gibt.",
+              "window_width": "Lichte Breite der Glasfläche. Mit Breite und Höhe wird berechnet, wie viel Sonne tatsächlich am Rahmen vorbei auf das Glas fällt.",
+              "window_height": "Lichte Höhe der Glasfläche.",
+              "reveal_depth": "Abstand von der Außenkante der Wand bis zum Glas. Standard 25 cm."
             }
           },
           "sun_section": {
