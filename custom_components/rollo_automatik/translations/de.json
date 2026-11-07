@@ -1,0 +1,274 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Rollo-Automatik einrichten",
+        "description": "Schritt 1 von 4: Für welchen Bereich sollen die Rollos automatisch fahren? Angeboten werden Bereiche mit Rollos.",
+        "data": {
+          "area": "Bereich"
+        },
+        "data_description": {
+          "area": "Jeder Bereich wird einmal eingerichtet und bekommt ein eigenes Gerät."
+        }
+      },
+      "room": {
+        "title": "{area}: Rollos und Sensoren",
+        "description": "Schritt 2 von 4: Vorgeschlagen werden Entitäten aus dem Bereich {area}.",
+        "sections": {
+          "covers_section": {
+            "name": "Rollos",
+            "description": "Diese Rollos steuert die Automatik. Danach stellst du jedes einzeln ein.",
+            "data": {
+              "covers": "Rollos"
+            },
+            "data_description": {
+              "covers": "Mindestens ein Rollo."
+            }
+          },
+          "sensors_section": {
+            "name": "Sensoren im Raum",
+            "description": "Alle optional.",
+            "data": {
+              "presence_entity": "Präsenzmelder",
+              "sleep_entity": "Schlafmodus",
+              "climate_entity": "Heizung/Klima"
+            },
+            "data_description": {
+              "presence_entity": "Bei Anwesenheit öffnen die Rollos tagsüber.",
+              "sleep_entity": "Schalter, der den Schlafmodus anzeigt. Ohne Auswahl gibt es keine Schlafpositionen.",
+              "climate_entity": "Heizen oder Kühlen entscheidet, ob bei Abwesenheit Sonnenwärme genutzt oder abgeschattet wird."
+            }
+          }
+        }
+      },
+      "cover": {
+        "title": "Rollo {index} von {total}: {cover}",
+        "description": "Schritt 3 von 4 · Bereich {area}. Einstellungen für **{cover}**.",
+        "sections": {
+          "window_section": {
+            "name": "Fenster",
+            "description": "Solange das Fenster offen ist, fährt das Rollo mindestens auf die Fensterposition. Breite und Höhe verfeinern, ab wann die Sonne direkt einfällt.",
+            "data": {
+              "window_entity": "Fensterkontakt",
+              "window_width": "Fensterbreite",
+              "window_height": "Fensterhöhe",
+              "reveal_depth": "Laibungstiefe"
+            },
+            "data_description": {
+              "window_entity": "Leer lassen, wenn es keinen gibt.",
+              "window_width": "Lichte Breite der Glasfläche. Mit Breite und Höhe wird berechnet, wie viel Sonne tatsächlich am Rahmen vorbei auf das Glas fällt.",
+              "window_height": "Lichte Höhe der Glasfläche.",
+              "reveal_depth": "Abstand von der Außenkante der Wand bis zum Glas. Standard 25 cm."
+            }
+          },
+          "sun_section": {
+            "name": "Sonne und Beschattung",
+            "description": "Wann scheint die Sonne direkt auf dieses Fenster und wie weit soll das Rollo dann schließen?",
+            "data": {
+              "orientation": "Ausrichtung des Fensters",
+              "shading_position": "Eigene Beschattungsposition",
+              "shading_conditions": "Beschatten nur, wenn"
+            },
+            "data_description": {
+              "orientation": "Himmelsrichtung, in die das Fenster zeigt, oder ein Azimut in Grad (z.B. 145).",
+              "shading_position": "Leer lassen, um die Beschattungsposition des Raums zu nutzen.",
+              "shading_conditions": "Optional. Alle Bedingungen müssen erfüllt sein, damit beschattet wird."
+            }
+          }
+        }
+      },
+      "outdoor": {
+        "title": "Außensensoren",
+        "description": "Schritt 4 von 4: Diese Werte gelten für das ganze Haus und werden beim nächsten Bereich vorgeschlagen.",
+        "sections": {
+          "outdoor_section": {
+            "name": "Außen",
+            "data": {
+              "illuminance_entity": "Außenhelligkeit",
+              "temperature_entity": "Außentemperatur",
+              "dusk_entity": "Dämmerung"
+            },
+            "data_description": {
+              "illuminance_entity": "Für Beschattung und Sonnenwärme.",
+              "temperature_entity": "Für den Kälteschutz.",
+              "dusk_entity": "Ohne Auswahl gilt der Sonnenuntergang."
+            }
+          },
+          "house_section": {
+            "name": "Anwesenheit im Haus",
+            "data": {
+              "house_presence_entity": "Präsenz im Haus"
+            },
+            "data_description": {
+              "house_presence_entity": "Ist er aus, gilt das Haus als leer. Ohne Sensor gilt es immer als bewohnt."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "no_covers": "Bitte mindestens ein Rollo wählen.",
+      "invalid_conditions": "Die Beschattungsbedingungen sind ungültig."
+    },
+    "abort": {
+      "already_configured": "Dieser Bereich ist schon eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "room": {
+        "title": "{area}: Rollos und Sensoren",
+        "description": "Vorgeschlagen werden Entitäten aus dem Bereich {area}.",
+        "sections": {
+          "covers_section": {
+            "name": "Rollos",
+            "description": "Diese Rollos steuert die Automatik. Danach stellst du jedes einzeln ein.",
+            "data": {
+              "covers": "Rollos"
+            },
+            "data_description": {
+              "covers": "Mindestens ein Rollo."
+            }
+          },
+          "sensors_section": {
+            "name": "Sensoren im Raum",
+            "description": "Alle optional.",
+            "data": {
+              "presence_entity": "Präsenzmelder",
+              "sleep_entity": "Schlafmodus",
+              "climate_entity": "Heizung/Klima"
+            },
+            "data_description": {
+              "presence_entity": "Bei Anwesenheit öffnen die Rollos tagsüber.",
+              "sleep_entity": "Schalter, der den Schlafmodus anzeigt. Ohne Auswahl gibt es keine Schlafpositionen.",
+              "climate_entity": "Heizen oder Kühlen entscheidet, ob bei Abwesenheit Sonnenwärme genutzt oder abgeschattet wird."
+            }
+          }
+        }
+      },
+      "cover": {
+        "title": "Rollo {index} von {total}: {cover}",
+        "description": "Bereich {area}. Einstellungen für **{cover}**.",
+        "sections": {
+          "window_section": {
+            "name": "Fenster",
+            "description": "Solange das Fenster offen ist, fährt das Rollo mindestens auf die Fensterposition. Breite und Höhe verfeinern, ab wann die Sonne direkt einfällt.",
+            "data": {
+              "window_entity": "Fensterkontakt",
+              "window_width": "Fensterbreite",
+              "window_height": "Fensterhöhe",
+              "reveal_depth": "Laibungstiefe"
+            },
+            "data_description": {
+              "window_entity": "Leer lassen, wenn es keinen gibt.",
+              "window_width": "Lichte Breite der Glasfläche. Mit Breite und Höhe wird berechnet, wie viel Sonne tatsächlich am Rahmen vorbei auf das Glas fällt.",
+              "window_height": "Lichte Höhe der Glasfläche.",
+              "reveal_depth": "Abstand von der Außenkante der Wand bis zum Glas. Standard 25 cm."
+            }
+          },
+          "sun_section": {
+            "name": "Sonne und Beschattung",
+            "description": "Wann scheint die Sonne direkt auf dieses Fenster und wie weit soll das Rollo dann schließen?",
+            "data": {
+              "orientation": "Ausrichtung des Fensters",
+              "shading_position": "Eigene Beschattungsposition",
+              "shading_conditions": "Beschatten nur, wenn"
+            },
+            "data_description": {
+              "orientation": "Himmelsrichtung, in die das Fenster zeigt, oder ein Azimut in Grad (z.B. 145).",
+              "shading_position": "Leer lassen, um die Beschattungsposition des Raums zu nutzen.",
+              "shading_conditions": "Optional. Alle Bedingungen müssen erfüllt sein, damit beschattet wird."
+            }
+          }
+        }
+      },
+      "outdoor": {
+        "title": "Außensensoren",
+        "description": "Diese Werte gelten für das ganze Haus und werden beim nächsten Bereich vorgeschlagen.",
+        "sections": {
+          "outdoor_section": {
+            "name": "Außen",
+            "data": {
+              "illuminance_entity": "Außenhelligkeit",
+              "temperature_entity": "Außentemperatur",
+              "dusk_entity": "Dämmerung"
+            },
+            "data_description": {
+              "illuminance_entity": "Für Beschattung und Sonnenwärme.",
+              "temperature_entity": "Für den Kälteschutz.",
+              "dusk_entity": "Ohne Auswahl gilt der Sonnenuntergang."
+            }
+          },
+          "house_section": {
+            "name": "Anwesenheit im Haus",
+            "data": {
+              "house_presence_entity": "Präsenz im Haus"
+            },
+            "data_description": {
+              "house_presence_entity": "Ist er aus, gilt das Haus als leer. Ohne Sensor gilt es immer als bewohnt."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "no_covers": "Bitte mindestens ein Rollo wählen.",
+      "invalid_conditions": "Die Beschattungsbedingungen sind ungültig."
+    }
+  },
+  "selector": {
+    "orientation": {
+      "options": {
+        "n": "Norden",
+        "ne": "Nordosten",
+        "e": "Osten",
+        "se": "Südosten",
+        "s": "Süden",
+        "sw": "Südwesten",
+        "w": "Westen",
+        "nw": "Nordwesten"
+      }
+    }
+  },
+  "entity": {
+    "number": {
+      "sleep_position": {
+        "name": "Schlafposition"
+      },
+      "sleep_window_position": {
+        "name": "Schlafposition bei offenem Fenster"
+      },
+      "window_position": {
+        "name": "Position bei offenem Fenster"
+      },
+      "shading_position": {
+        "name": "Beschattungsposition"
+      },
+      "illuminance_threshold": {
+        "name": "Helligkeitsschwelle"
+      },
+      "illuminance_hysteresis": {
+        "name": "Helligkeit Hysterese"
+      },
+      "cold_threshold": {
+        "name": "Kälteschwelle"
+      },
+      "deadband": {
+        "name": "Totzone"
+      }
+    },
+    "switch": {
+      "automation": {
+        "name": "Automatik"
+      },
+      "shading": {
+        "name": "Beschattung"
+      }
+    },
+    "sensor": {
+      "status": {
+        "name": "Status"
+      }
+    }
+  }
+}

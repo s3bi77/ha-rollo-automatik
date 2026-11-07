@@ -1,0 +1,274 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up cover automation",
+        "description": "Step 1 of 4: Which area should have automatic covers? Areas with covers are offered.",
+        "data": {
+          "area": "Area"
+        },
+        "data_description": {
+          "area": "Each area is set up once and gets its own device."
+        }
+      },
+      "room": {
+        "title": "{area}: covers and sensors",
+        "description": "Step 2 of 4: Entities from the area {area} are suggested.",
+        "sections": {
+          "covers_section": {
+            "name": "Covers",
+            "description": "The automation controls these covers. You set up each one next.",
+            "data": {
+              "covers": "Covers"
+            },
+            "data_description": {
+              "covers": "At least one cover."
+            }
+          },
+          "sensors_section": {
+            "name": "Room sensors",
+            "description": "All optional.",
+            "data": {
+              "presence_entity": "Presence sensor",
+              "sleep_entity": "Sleep mode",
+              "climate_entity": "Heating/climate"
+            },
+            "data_description": {
+              "presence_entity": "When someone is present, covers open during the day.",
+              "sleep_entity": "Switch that indicates sleep mode. Without it there are no sleep positions.",
+              "climate_entity": "Heating or cooling decides whether sun is let in or blocked while nobody is home."
+            }
+          }
+        }
+      },
+      "cover": {
+        "title": "Cover {index} of {total}: {cover}",
+        "description": "Step 3 of 4 · Area {area}. Settings for **{cover}**.",
+        "sections": {
+          "window_section": {
+            "name": "Window",
+            "description": "While the window is open the cover moves at least to the window position. Width and height refine when the sun counts as direct.",
+            "data": {
+              "window_entity": "Window sensor",
+              "window_width": "Window width",
+              "window_height": "Window height",
+              "reveal_depth": "Reveal depth"
+            },
+            "data_description": {
+              "window_entity": "Leave empty if there is none.",
+              "window_width": "Clear width of the glazing. With width and height the integration calculates how much sun actually gets past the reveal onto the glass.",
+              "window_height": "Clear height of the glazing.",
+              "reveal_depth": "Distance from the outer wall face to the glass. Default 25 cm."
+            }
+          },
+          "sun_section": {
+            "name": "Sun and shading",
+            "description": "When does the sun shine directly on this window, and how far should the cover close?",
+            "data": {
+              "orientation": "Window orientation",
+              "shading_position": "Own shading position",
+              "shading_conditions": "Only shade when"
+            },
+            "data_description": {
+              "orientation": "Compass direction the window faces, or an azimuth in degrees (e.g. 145).",
+              "shading_position": "Leave empty to use the room's shading position.",
+              "shading_conditions": "Optional. All conditions must be met to shade."
+            }
+          }
+        }
+      },
+      "outdoor": {
+        "title": "Outdoor sensors",
+        "description": "Step 4 of 4: These apply to the whole house and are suggested for the next area.",
+        "sections": {
+          "outdoor_section": {
+            "name": "Outdoor",
+            "data": {
+              "illuminance_entity": "Outdoor illuminance",
+              "temperature_entity": "Outdoor temperature",
+              "dusk_entity": "Dusk"
+            },
+            "data_description": {
+              "illuminance_entity": "Used for shading and solar gain.",
+              "temperature_entity": "Used for cold protection.",
+              "dusk_entity": "Without it, sunset counts as dusk."
+            }
+          },
+          "house_section": {
+            "name": "Presence in the house",
+            "data": {
+              "house_presence_entity": "House presence"
+            },
+            "data_description": {
+              "house_presence_entity": "If it is off, the house counts as empty. Without a sensor it always counts as occupied."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "no_covers": "Choose at least one cover.",
+      "invalid_conditions": "The shading conditions are invalid."
+    },
+    "abort": {
+      "already_configured": "This area is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "room": {
+        "title": "{area}: covers and sensors",
+        "description": "Entities from the area {area} are suggested.",
+        "sections": {
+          "covers_section": {
+            "name": "Covers",
+            "description": "The automation controls these covers. You set up each one next.",
+            "data": {
+              "covers": "Covers"
+            },
+            "data_description": {
+              "covers": "At least one cover."
+            }
+          },
+          "sensors_section": {
+            "name": "Room sensors",
+            "description": "All optional.",
+            "data": {
+              "presence_entity": "Presence sensor",
+              "sleep_entity": "Sleep mode",
+              "climate_entity": "Heating/climate"
+            },
+            "data_description": {
+              "presence_entity": "When someone is present, covers open during the day.",
+              "sleep_entity": "Switch that indicates sleep mode. Without it there are no sleep positions.",
+              "climate_entity": "Heating or cooling decides whether sun is let in or blocked while nobody is home."
+            }
+          }
+        }
+      },
+      "cover": {
+        "title": "Cover {index} of {total}: {cover}",
+        "description": "Area {area}. Settings for **{cover}**.",
+        "sections": {
+          "window_section": {
+            "name": "Window",
+            "description": "While the window is open the cover moves at least to the window position. Width and height refine when the sun counts as direct.",
+            "data": {
+              "window_entity": "Window sensor",
+              "window_width": "Window width",
+              "window_height": "Window height",
+              "reveal_depth": "Reveal depth"
+            },
+            "data_description": {
+              "window_entity": "Leave empty if there is none.",
+              "window_width": "Clear width of the glazing. With width and height the integration calculates how much sun actually gets past the reveal onto the glass.",
+              "window_height": "Clear height of the glazing.",
+              "reveal_depth": "Distance from the outer wall face to the glass. Default 25 cm."
+            }
+          },
+          "sun_section": {
+            "name": "Sun and shading",
+            "description": "When does the sun shine directly on this window, and how far should the cover close?",
+            "data": {
+              "orientation": "Window orientation",
+              "shading_position": "Own shading position",
+              "shading_conditions": "Only shade when"
+            },
+            "data_description": {
+              "orientation": "Compass direction the window faces, or an azimuth in degrees (e.g. 145).",
+              "shading_position": "Leave empty to use the room's shading position.",
+              "shading_conditions": "Optional. All conditions must be met to shade."
+            }
+          }
+        }
+      },
+      "outdoor": {
+        "title": "Outdoor sensors",
+        "description": "These apply to the whole house and are suggested for the next area.",
+        "sections": {
+          "outdoor_section": {
+            "name": "Outdoor",
+            "data": {
+              "illuminance_entity": "Outdoor illuminance",
+              "temperature_entity": "Outdoor temperature",
+              "dusk_entity": "Dusk"
+            },
+            "data_description": {
+              "illuminance_entity": "Used for shading and solar gain.",
+              "temperature_entity": "Used for cold protection.",
+              "dusk_entity": "Without it, sunset counts as dusk."
+            }
+          },
+          "house_section": {
+            "name": "Presence in the house",
+            "data": {
+              "house_presence_entity": "House presence"
+            },
+            "data_description": {
+              "house_presence_entity": "If it is off, the house counts as empty. Without a sensor it always counts as occupied."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "no_covers": "Choose at least one cover.",
+      "invalid_conditions": "The shading conditions are invalid."
+    }
+  },
+  "selector": {
+    "orientation": {
+      "options": {
+        "n": "North",
+        "ne": "North-east",
+        "e": "East",
+        "se": "South-east",
+        "s": "South",
+        "sw": "South-west",
+        "w": "West",
+        "nw": "North-west"
+      }
+    }
+  },
+  "entity": {
+    "number": {
+      "sleep_position": {
+        "name": "Sleep position"
+      },
+      "sleep_window_position": {
+        "name": "Sleep position with open window"
+      },
+      "window_position": {
+        "name": "Open window position"
+      },
+      "shading_position": {
+        "name": "Shading position"
+      },
+      "illuminance_threshold": {
+        "name": "Illuminance threshold"
+      },
+      "illuminance_hysteresis": {
+        "name": "Illuminance hysteresis"
+      },
+      "cold_threshold": {
+        "name": "Cold threshold"
+      },
+      "deadband": {
+        "name": "Dead band"
+      }
+    },
+    "switch": {
+      "automation": {
+        "name": "Automation"
+      },
+      "shading": {
+        "name": "Shading"
+      }
+    },
+    "sensor": {
+      "status": {
+        "name": "Status"
+      }
+    }
+  }
+}
