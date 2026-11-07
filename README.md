@@ -61,3 +61,9 @@ Die drei Schlaf- und Fensterpositionen halten sich gegenseitig in der Reihenfolg
 python -m venv .venv && .venv/bin/pip install pytest-homeassistant-custom-component
 .venv/bin/pytest
 ```
+
+## Lizenz und Haftung
+
+MIT-Lizenz, siehe [LICENSE](LICENSE). Nutzung auf eigene Verantwortung: Die Integration fährt Rollläden selbstständig. Vor dem Einsatz prüfen, dass niemand eingeklemmt werden kann und Fluchtwege nicht verschlossen werden.
+
+„Home Assistant“ ist eine Marke der Open Home Foundation. Dieses Projekt ist kein offizieller Bestandteil von Home Assistant.

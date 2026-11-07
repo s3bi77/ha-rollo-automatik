@@ -21,8 +21,8 @@ from custom_components.rollo_automatik.logic import (
     lit_fraction,
 )
 
-COVER = "cover.kind_1_fenster"
-SOUTH_EAST = CoverConfig(COVER, "binary_sensor.kind_1_fenster", orientation=135)
+COVER = "cover.arbeitszimmer_fenster"
+SOUTH_EAST = CoverConfig(COVER, "binary_sensor.arbeitszimmer_fenster", orientation=135)
 
 
 def make_inputs(**overrides) -> Inputs:

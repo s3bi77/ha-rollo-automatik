@@ -11,20 +11,20 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, async_
 
 from custom_components.rollo_automatik.const import DOMAIN
 
-COVER = "cover.kind_1_fenster"
+COVER = "cover.arbeitszimmer_fenster"
 
 
 @pytest.fixture
 def area(hass: HomeAssistant) -> str:
     """Bereich mit Rollo, Fenster, Präsenz und Schlafmodus."""
-    area = ar.async_get(hass).async_create("Kind 1")
+    area = ar.async_get(hass).async_create("Arbeitszimmer")
     registry = er.async_get(hass)
     for domain, object_id, device_class in (
-        ("cover", "kind_1_fenster", None),
-        ("binary_sensor", "kind_1_fenster_offen", "window"),
-        ("binary_sensor", "kind_1_anwesenheit", "presence"),
-        ("switch", "kind_1_schlafen", None),
-        ("climate", "kind_1", None),
+        ("cover", "arbeitszimmer_fenster", None),
+        ("binary_sensor", "arbeitszimmer_fenster_offen", "window"),
+        ("binary_sensor", "arbeitszimmer_anwesenheit", "presence"),
+        ("switch", "arbeitszimmer_schlafen", None),
+        ("climate", "arbeitszimmer", None),
     ):
         entry = registry.async_get_or_create(
             domain, "test", object_id, suggested_object_id=object_id, original_device_class=device_class
@@ -36,13 +36,13 @@ def area(hass: HomeAssistant) -> str:
 def room_data(area_id: str, **overrides) -> dict:
     data = {
         "area": area_id,
-        "presence_entity": "binary_sensor.kind_1_anwesenheit",
-        "sleep_entity": "switch.kind_1_schlafen",
-        "climate_entity": "climate.kind_1",
+        "presence_entity": "binary_sensor.arbeitszimmer_anwesenheit",
+        "sleep_entity": "switch.arbeitszimmer_schlafen",
+        "climate_entity": "climate.arbeitszimmer",
         "covers": [
             {
                 "entity_id": COVER,
-                "window_entity": "binary_sensor.kind_1_fenster_offen",
+                "window_entity": "binary_sensor.arbeitszimmer_fenster_offen",
                 "orientation": "se",
                 "shading_position": None,
                 "shading_conditions": [],
@@ -58,7 +58,7 @@ def room_data(area_id: str, **overrides) -> dict:
 
 
 async def _setup(hass: HomeAssistant, data: dict) -> MockConfigEntry:
-    entry = MockConfigEntry(domain=DOMAIN, data=data, unique_id=data["area"], title="Kind 1", version=2)
+    entry = MockConfigEntry(domain=DOMAIN, data=data, unique_id=data["area"], title="Arbeitszimmer", version=2)
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
@@ -130,10 +130,10 @@ async def test_house_presence_sensor(hass: HomeAssistant, area: str) -> None:
     calls = async_mock_service(hass, "cover", "set_cover_position")
     hass.states.async_set(COVER, "closed", {"current_position": 0})
     hass.states.async_set("binary_sensor.haus_anwesend", "on")
-    hass.states.async_set("binary_sensor.kind_1_anwesenheit", "off")
+    hass.states.async_set("binary_sensor.arbeitszimmer_anwesenheit", "off")
     await _setup(hass, room_data(area, house_presence_entity="binary_sensor.haus_anwesend"))
 
-    hass.states.async_set("binary_sensor.kind_1_anwesenheit", "on")
+    hass.states.async_set("binary_sensor.arbeitszimmer_anwesenheit", "on")
     await hass.async_block_till_done()
     assert calls[-1].data == {"entity_id": COVER, "position": 100}
 
@@ -177,7 +177,7 @@ async def test_config_flow(hass: HomeAssistant, area: str) -> None:
         result["flow_id"],
         {
             "covers_section": {"covers": [COVER]},
-            "sensors_section": {"presence_entity": "binary_sensor.kind_1_anwesenheit"},
+            "sensors_section": {"presence_entity": "binary_sensor.arbeitszimmer_anwesenheit"},
         },
     )
     assert result["step_id"] == "cover"
@@ -186,7 +186,7 @@ async def test_config_flow(hass: HomeAssistant, area: str) -> None:
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
-            "window_section": {"window_entity": "binary_sensor.kind_1_fenster_offen"},
+            "window_section": {"window_entity": "binary_sensor.arbeitszimmer_fenster_offen"},
             "sun_section": {
                 "orientation": "sw",
                 "shading_conditions": [{"condition": "state", "entity_id": "input_boolean.x", "state": "on"}],
@@ -199,7 +199,7 @@ async def test_config_flow(hass: HomeAssistant, area: str) -> None:
         {"outdoor_section": {"dusk_entity": "binary_sensor.dammerung"}, "house_section": {}},
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["title"] == "Kind 1"
+    assert result["title"] == "Arbeitszimmer"
     assert result["data"]["dusk_entity"] == "binary_sensor.dammerung"
     assert result["data"]["covers"][0]["orientation"] == "sw"
     assert result["data"]["sleep_entity"] is None
@@ -230,14 +230,14 @@ async def test_options_flow_keeps_cover_settings(hass: HomeAssistant, area: str)
         result["flow_id"],
         {
             "covers_section": {"covers": [COVER]},
-            "sensors_section": {"sleep_entity": "switch.kind_1_schlafen"},
+            "sensors_section": {"sleep_entity": "switch.arbeitszimmer_schlafen"},
         },
     )
     assert result["step_id"] == "cover"
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
         {
-            "window_section": {"window_entity": "binary_sensor.kind_1_fenster_offen"},
+            "window_section": {"window_entity": "binary_sensor.arbeitszimmer_fenster_offen"},
             "sun_section": {"orientation": "w"},
         },
     )
@@ -253,16 +253,16 @@ async def test_options_flow_keeps_cover_settings(hass: HomeAssistant, area: str)
 
 async def test_fixes_doubled_area_in_entity_ids(hass: HomeAssistant, area: str) -> None:
     data = room_data(area)
-    entry = MockConfigEntry(domain=DOMAIN, data=data, unique_id=area, title="Kind 1", version=2)
+    entry = MockConfigEntry(domain=DOMAIN, data=data, unique_id=area, title="Arbeitszimmer", version=2)
     entry.add_to_hass(hass)
     er.async_get(hass).async_get_or_create(
         "switch",
         DOMAIN,
         f"{entry.entry_id}_automation",
         config_entry=entry,
-        suggested_object_id="kind_1_kind_1_rollos_automatik",
+        suggested_object_id="arbeitszimmer_arbeitszimmer_rollos_automatik",
     )
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    assert hass.states.get("switch.kind_1_rollos_automatik") is not None
-    assert hass.states.get("switch.kind_1_kind_1_rollos_automatik") is None
+    assert hass.states.get("switch.arbeitszimmer_rollos_automatik") is not None
+    assert hass.states.get("switch.arbeitszimmer_arbeitszimmer_rollos_automatik") is None
